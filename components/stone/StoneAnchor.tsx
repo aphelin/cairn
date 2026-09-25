@@ -8,18 +8,22 @@ export function StoneAnchor({
   still,
   className,
   priority,
+  arrive,
 }: {
   stone: "main" | "home";
   order?: number;
   still: string;
   className?: string;
   priority?: boolean;
+  /** "jump": the travelling stone arrives here without gliding over what lies between. */
+  arrive?: "jump";
 }) {
   return (
     <div
       className={`${styles.anchor} ${stone === "home" ? styles.home : ""} ${className ?? ""}`}
       data-stone={stone}
       data-stone-order={order}
+      data-stone-arrive={arrive}
       aria-hidden="true"
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- static export; the still is pre-sized */}

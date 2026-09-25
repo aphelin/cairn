@@ -35,6 +35,7 @@ const SHAPE: Record<Model, [number, number, number]> = {
   home: [1.12, 0.76, 1.04],
 };
 const BASE = 0.6; // the underside is squashed to this fraction, so it sits
+const HOLD = 0.28; // the share of each glide at either end where the stone rests on its anchor
 
 type Stone = {
   id: string;
@@ -276,7 +277,8 @@ export class StoneStage {
   private place(stone: Stone): boolean {
     const vh = window.innerHeight;
     const centre = vh / 2;
-    const rects = stone.anchors.map((a) => a.getBoundingClientRect()).filter((r) => r.width > 0);
+    const live = stone.anchors.filter((a) => a.getBoundingClientRect().width > 0);
+    const rects = live.map((a) => a.getBoundingClientRect());
     if (!rects.length) return false;
     // Find the pair of anchors the viewport centre sits between.
     let a = rects[0]!;
@@ -294,9 +296,12 @@ export class StoneStage {
           a = ra;
           b = rb;
           const f = clamp01((centre - mid(ra)) / (mid(rb) - mid(ra)));
-          // Across a long stretch of page it doesn't glide: it leaves with one
-          // anchor and arrives with the next, both off-screen at the switch.
-          t = mid(rb) - mid(ra) > vh * 2.2 ? (f < 0.5 ? 0 : 1) : smooth(f);
+          // Across a long stretch of page, or into an anchor that asks for it,
+          // it doesn't glide: it leaves with one anchor and arrives with the
+          // next, both off-screen at the switch. Otherwise it rests on each
+          // anchor while that anchor is near the middle, and glides between.
+          const jump = mid(rb) - mid(ra) > vh * 2.2 || live[i + 1]?.dataset.stoneArrive === "jump";
+          t = jump ? (f < 0.5 ? 0 : 1) : smooth(clamp01((f - HOLD) / (1 - 2 * HOLD)));
           break;
         }
       }

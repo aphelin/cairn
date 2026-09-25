@@ -12,7 +12,9 @@ const [url = "http://127.0.0.1:3300/", out = ".impeccable/review"] = process.arg
 const flags = new Set(process.argv.slice(2).filter((a) => a.startsWith("--")));
 mkdirSync(out, { recursive: true });
 
-const browser = await chromium.launch({ args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
+// Headless Chromium's default full font hinting breaks Barlow's spacing at
+// small sizes ("Re els"); devices and Firefox don't hint that way.
+const browser = await chromium.launch({ args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist", "--font-render-hinting=none"] });
 const sizes = [
   { name: "desktop", viewport: { width: 1440, height: 900 } },
   { name: "mobile", viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 },

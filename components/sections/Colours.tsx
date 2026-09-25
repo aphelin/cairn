@@ -15,7 +15,8 @@ export function Colours() {
     <section id="colours" className="section" data-ground="green" aria-labelledby="colours-title">
       <div className={`inner ${styles.grid}`}>
         <div className={styles.visual}>
-          <StoneAnchor stone="main" order={3} still={`/stills/pocket-${colour}.webp`} className={styles.stone} />
+          {/* The photograph lies between here and the stones, so the stone arrives rather than glides. */}
+          <StoneAnchor stone="main" order={3} still={`/stills/pocket-${colour}.webp`} className={styles.stone} arrive="jump" />
           <p className={styles.caption} aria-live="polite">
             <strong>{current.name}.</strong> Found at {current.found}.
           </p>

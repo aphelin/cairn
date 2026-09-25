@@ -55,8 +55,8 @@
   box-shadow: 0 0 0 2px var(--black);
 }
 
-/* Off the current step, the mark is plain black on white. */
-.waypoint:not([data-here]) :global(.blaze) > span {
+/* The waypoints are plain trail marks, black on white. */
+.waypoint :global(.blaze) > span {
   background: var(--black);
 }
 
@@ -114,7 +114,7 @@
    sits inside its frame, so the frame reaches past the column to line it up. */
 .stone {
   width: min(100%, 22rem);
-  margin-bottom: -2.2rem;
+  margin-bottom: -3.4rem;
   margin-left: -1.5rem;
 }
 
