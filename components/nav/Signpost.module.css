@@ -4,6 +4,7 @@
 .header {
   --p-bg: var(--yellow);
   --p-ink: var(--black);
+  --nav-focus: var(--black);
   position: fixed;
   inset: 0 0 auto;
   z-index: 50;
@@ -24,14 +25,17 @@
 }
 
 .header[data-on="blue"] {
+  --nav-focus: var(--yellow);
   background: var(--blue);
 }
 
 .header[data-on="green"] {
+  --nav-focus: var(--yellow);
   background: var(--green);
 }
 
 .header[data-on="black"] {
+  --nav-focus: var(--yellow);
   background: var(--black);
 }
 
@@ -174,10 +178,11 @@
   color: var(--yellow);
 }
 
+/* Focus takes the ground's own focus colour; red stays for "you are here". */
 .sound:focus-visible,
 .menu:focus-visible,
 .location:focus-visible {
-  outline: 3px solid var(--blaze);
+  outline: 3px solid var(--nav-focus);
   outline-offset: 2px;
 }
 
