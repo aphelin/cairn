@@ -29,14 +29,16 @@ export function How() {
             <div className={styles.visual}>
               <StoneAnchor stone="main" order={1} still="/stills/pocket-granite.webp" className={styles.stone} />
             </div>
-            <Waypoint />
+            <Waypoint here />
             <StepText {...STEPS[1]!} />
           </li>
           <li className={styles.step}>
             <div className={styles.visual} aria-hidden="true">
-              <span className={styles.back}>
-                <Arrow />
-                Back to the stone
+              <span className={styles.post}>
+                <span className={styles.back}>
+                  <Arrow />
+                  Back to the stone
+                </span>
               </span>
             </div>
             <Waypoint />
@@ -48,9 +50,10 @@ export function How() {
   );
 }
 
-function Waypoint() {
+// A trail mark on the line. Only the stone's waypoint is red: that's where you tap.
+function Waypoint({ here }: { here?: boolean }) {
   return (
-    <span className={styles.waypoint} aria-hidden="true">
+    <span className={styles.waypoint} data-here={here ? "" : undefined} aria-hidden="true">
       <span className="blaze">
         <span />
       </span>

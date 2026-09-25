@@ -3,6 +3,7 @@ import { Hero } from "@/components/hero/Hero";
 import { How } from "@/components/sections/How";
 import { Stones } from "@/components/sections/Stones";
 import { Colours } from "@/components/sections/Colours";
+import { Doorway } from "@/components/sections/Doorway";
 import { AppDemo } from "@/components/sections/AppDemo";
 import { TimeBack } from "@/components/sections/TimeBack";
 import { Box } from "@/components/sections/Box";
@@ -23,6 +24,7 @@ export default function Page() {
         <Hero />
         <How />
         <Stones />
+        <Doorway />
         <Colours />
         <AppDemo />
         <TimeBack />

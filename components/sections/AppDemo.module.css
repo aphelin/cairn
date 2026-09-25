@@ -2,16 +2,15 @@
   display: grid;
   grid-template-columns: 1fr minmax(18rem, 22rem) 1fr;
   grid-template-areas:
-    "head head head"
-    "a phone b"
-    "a phone c";
+    "head phone a"
+    "b phone c";
   column-gap: clamp(1.5rem, 4vw, 4rem);
-  row-gap: var(--space-4);
+  row-gap: var(--space-7);
 }
 
 .head {
   grid-area: head;
-  margin-bottom: var(--space-7);
+  align-self: center;
 }
 
 .notes {
@@ -24,7 +23,6 @@
   --tip: 0.9rem;
   align-self: center;
   max-width: 17rem;
-  padding: 0.7rem 1rem;
   background: var(--yellow);
   font-family: var(--font-sign);
   font-size: var(--step-1);
@@ -32,31 +30,28 @@
   line-height: 1.1;
 }
 
-.noteA {
-  grid-area: a;
-  justify-self: end;
-  margin-top: -6rem;
-  padding-right: calc(var(--tip) + 1rem) !important;
-  clip-path: polygon(0 0, calc(100% - var(--tip)) 0, 100% 50%, calc(100% - var(--tip)) 100%, 0 100%);
-}
-
-.noteB,
+/* Pointing left, at the phone on their left */
+.noteA,
 .noteC {
   justify-self: start;
-  padding-left: calc(var(--tip) + 1rem) !important;
+  padding: 0.7rem 1rem 0.7rem calc(var(--tip) + 1rem);
   clip-path: polygon(var(--tip) 0, 100% 0, 100% 100%, var(--tip) 100%, 0 50%);
 }
 
-.noteB {
-  grid-area: b;
-  align-self: end !important;
-  margin-bottom: 1rem;
+.noteA {
+  grid-area: a;
 }
 
 .noteC {
   grid-area: c;
-  align-self: start !important;
-  margin-top: 5rem;
+}
+
+/* Pointing right, at the phone on its right */
+.noteB {
+  grid-area: b;
+  justify-self: end;
+  padding: 0.7rem calc(var(--tip) + 1rem) 0.7rem 1rem;
+  clip-path: polygon(0 0, calc(100% - var(--tip)) 0, 100% 50%, calc(100% - var(--tip)) 100%, 0 100%);
 }
 
 /* ——— The phone ——— */
@@ -200,14 +195,15 @@
   line-height: 1.1;
 }
 
-/* The stone lands on the tile. */
+/* The stone lands on the tile: the same render as the stone on the page. */
 .pebble {
   position: absolute;
-  top: 0.9rem;
+  top: 0.35rem;
   left: 50%;
-  width: 2.1rem;
+  width: 3.4rem;
+  height: auto;
   translate: -50% 0;
-  filter: drop-shadow(0 3px 2px rgb(20 20 20 / 0.35));
+  pointer-events: none;
   animation: land 520ms var(--ease-settle) both;
 }
 
@@ -389,17 +385,17 @@
     margin-bottom: var(--space-5);
   }
 
-  .notes li {
-    justify-self: start !important;
-    align-self: start !important;
-    margin: 0 !important;
-    padding: 0.4rem 0.7rem !important;
+  .noteA,
+  .noteB,
+  .noteC {
+    justify-self: start;
+    padding: 0.4rem 0.7rem;
     font-size: var(--step-0);
     clip-path: none;
   }
 
   .noteC {
-    margin-bottom: var(--space-6) !important;
+    margin-bottom: var(--space-6);
   }
 
   .phone {

@@ -38,6 +38,7 @@ export function Signpost() {
     const counts = sections.map((s) => (s.innerText.match(/\S+/g) ?? []).length);
     const starts = counts.map((_, i) => counts.slice(0, i).reduce((a, b) => a + b, 0));
     let frame = 0;
+    let lastKey = "";
 
     const update = () => {
       frame = 0;
@@ -61,21 +62,25 @@ export function Signpost() {
       const within = Math.min(1, Math.max(0, (line - r.top) / Math.max(1, r.height)));
       const position = starts[here]! + counts[here]! * within;
 
-      setPlates(
-        ROUTE.map((route) => {
-          const i = sections.findIndex((s) => s.id === route.id);
-          const words = Math.abs(starts[i]! - position);
-          return {
-            id: route.id,
-            label: route.label,
-            minutes: Math.max(1, Math.round(words / WPM)),
-            ahead: starts[i]! >= position - 1,
-            here: i === here,
-          };
-        }),
-      );
+      const next = ROUTE.map((route) => {
+        const i = sections.findIndex((s) => s.id === route.id);
+        const words = Math.abs(starts[i]! - position);
+        return {
+          id: route.id,
+          label: route.label,
+          minutes: Math.max(1, Math.round(words / WPM)),
+          ahead: starts[i]! >= position - 1,
+          here: i === here,
+        };
+      });
+      // Only re-render the plates when what they say has changed.
+      const key = next.map((p) => `${p.minutes}${p.ahead ? ">" : "<"}${p.here ? "*" : ""}`).join("|");
+      if (key !== lastKey) {
+        lastKey = key;
+        setPlates(next);
+      }
       const max = document.documentElement.scrollHeight - vh;
-      setProgress(max > 0 ? window.scrollY / max : 0);
+      setProgress(max > 0 ? Math.round((window.scrollY / max) * 1000) / 1000 : 0);
     };
 
     const schedule = () => {
@@ -169,10 +174,8 @@ export function Signpost() {
       </header>
 
       {/* The blaze spine: the trail's own stripe, with you on it. */}
-      <div className={styles.spine} data-on={ground} aria-hidden="true">
-        <span className={styles.marker} style={{ top: `${progress * 100}%` }}>
-          <i />
-        </span>
+      <div className={styles.spine} aria-hidden="true">
+        <span className={styles.marker} style={{ top: `${progress * 100}%` }} />
       </div>
     </>
   );

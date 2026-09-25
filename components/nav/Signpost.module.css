@@ -203,46 +203,28 @@
   font-size: 1.15rem;
 }
 
-/* ——— The spine ——— */
+/* ——— The spine: the trail's own blaze, white, red, white, running the page ——— */
 .spine {
   position: fixed;
-  left: calc(var(--gutter) / 2 - 1px);
-  top: calc(var(--nav-h) + 2.5rem);
-  bottom: 2rem;
+  left: calc(var(--gutter) / 2 - var(--spine) / 2);
+  top: var(--nav-h);
+  bottom: 0;
   z-index: 40;
-  width: 2px;
-  background: currentColor;
-  color: rgb(20 20 20 / 0.25);
+  width: var(--spine);
+  background: linear-gradient(90deg, var(--white) 0 30%, var(--blaze) 30% 70%, var(--white) 70%);
+  box-shadow: 0 0 0 1px rgb(20 20 20 / 0.18);
   pointer-events: none;
-  transition: color 300ms var(--ease-out);
 }
 
-.spine[data-on="blue"],
-.spine[data-on="green"],
-.spine[data-on="black"] {
-  color: rgb(255 255 255 / 0.35);
-}
-
-/* The marker is a painted blaze: white, red, white. */
+/* You, on the trail: a waymark post that walks down the stripe. */
 .marker {
   position: absolute;
   left: 50%;
-  display: grid;
-  grid-template-rows: 1fr 1fr 1fr;
-  width: 0.95rem;
-  height: 1.3rem;
+  width: calc(var(--spine) + 0.7rem);
+  height: 0.55rem;
+  background: var(--black);
+  box-shadow: 0 0 0 2px var(--white);
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 1px rgb(20 20 20 / 0.35);
-}
-
-.marker::before,
-.marker::after {
-  content: "";
-  background: var(--white);
-}
-
-.marker i {
-  background: var(--blaze);
 }
 
 @media (max-width: 980px) {
@@ -259,7 +241,7 @@
   }
 
   .spine {
-    display: none;
+    --spine: 0.3rem;
   }
 }
 

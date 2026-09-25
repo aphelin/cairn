@@ -5,6 +5,11 @@
   align-items: start;
 }
 
+.stone {
+  width: min(100%, 26rem);
+  margin-top: var(--space-7);
+}
+
 .form {
   display: grid;
   gap: var(--space-6);

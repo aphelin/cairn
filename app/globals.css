@@ -146,7 +146,6 @@ body {
   line-height: 1.5;
   background: var(--chalk);
   color: var(--black);
-  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   font-variant-numeric: lining-nums;
   caret-color: var(--blaze);
@@ -247,6 +246,16 @@ p {
   z-index: 2; /* above the stone canvas, so a travelling stone passes behind words */
   max-width: 1320px;
   margin-inline: auto;
+}
+
+/* Survey linework on a ground, in that ground's own ink. The page's only ornament. */
+.contoured::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--contour);
+  mask: url("/contours.svg") center / cover no-repeat;
+  pointer-events: none;
 }
 
 .title {

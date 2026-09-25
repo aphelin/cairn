@@ -16,12 +16,12 @@ export const HERO = {
 // The noise. Invented apps, so no real product is named.
 export const NOISE = [
   { app: "Group chat", text: "23 new messages", tone: "green" },
-  { app: "Reels", text: "40 new videos for you", tone: "red" },
+  { app: "Reels", text: "40 new videos for you", tone: "purple" },
   { app: "Mail", text: "3 unread from work", tone: "blue" },
-  { app: "News", text: "Breaking: you won't believe this", tone: "red" },
+  { app: "News", text: "Breaking: you won't believe this", tone: "black" },
   { app: "Shop", text: "Your cart misses you", tone: "yellow" },
   { app: "Chirp", text: "12 people liked your post", tone: "blue" },
-  { app: "Stream", text: "Next episode in 5 seconds", tone: "red" },
+  { app: "Stream", text: "Next episode in 5 seconds", tone: "purple" },
   { app: "Game", text: "Your lives are full", tone: "green" },
   { app: "Calendar", text: "Standup moved again", tone: "yellow" },
 ] as const;

@@ -178,6 +178,7 @@ export class StoneStage {
   private colourTo = new Color();
   private colourT = 1;
   private frozen: boolean;
+  private cleared = false;
   private onFrame?: () => void;
 
   constructor(private canvas: HTMLCanvasElement, colour: string) {
@@ -292,7 +293,10 @@ export class StoneStage {
         if (centre < mid(rb)) {
           a = ra;
           b = rb;
-          t = smooth(clamp01((centre - mid(ra)) / (mid(rb) - mid(ra))));
+          const f = clamp01((centre - mid(ra)) / (mid(rb) - mid(ra)));
+          // Across a long stretch of page it doesn't glide: it leaves with one
+          // anchor and arrives with the next, both off-screen at the switch.
+          t = mid(rb) - mid(ra) > vh * 2.2 ? (f < 0.5 ? 0 : 1) : smooth(f);
           break;
         }
       }
@@ -331,8 +335,14 @@ export class StoneStage {
       s.inner.rotation.y = s.spin + this.pointer.x * 0.35;
       s.outer.rotation.x = 0.46 + this.pointer.y * 0.12;
     }
-    if (any || this.colourT < 1) this.renderer.render(this.scene, this.camera);
-    else this.renderer.clear();
+    if (any || this.colourT < 1) {
+      this.renderer.render(this.scene, this.camera);
+      this.cleared = false;
+    } else if (!this.cleared) {
+      // Nothing on screen: clear once, then skip drawing until a stone returns.
+      this.renderer.clear();
+      this.cleared = true;
+    }
     this.onFrame?.();
   }
 

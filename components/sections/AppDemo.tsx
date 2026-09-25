@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { APPS, COLOURS, SCHEDULES } from "@/lib/content";
+import { APPS, SCHEDULES } from "@/lib/content";
 import { useStore } from "@/lib/store";
 import { useSpring } from "@/lib/useSpring";
 import { AppGlyph, Battery, Minus, Plus, Signal, TrendDown } from "@/components/icons";
@@ -21,7 +21,6 @@ export function AppDemo() {
   const [limit, setLimit] = useState(90);
   const [schedules, setSchedules] = useState(() => Object.fromEntries(SCHEDULES.map((s) => [s.id, s.on])));
   const colour = useStore((s) => s.colour);
-  const hex = COLOURS.find((c) => c.id === colour)?.hex ?? COLOURS[1]!.hex;
   const count = useSpring(locked.size);
   const shown = useSpring(limit);
   const diff = limit - LAST_WEEK;
@@ -79,9 +78,8 @@ export function AppDemo() {
                       </span>
                       <span className={styles.appName}>{a.name}</span>
                       {on && (
-                        <svg className={styles.pebble} viewBox="0 0 24 16" aria-hidden="true">
-                          <ellipse cx="12" cy="8.5" rx="10.5" ry="6.5" fill={hex} stroke="#141414" strokeWidth="1.5" />
-                        </svg>
+                        // eslint-disable-next-line @next/next/no-img-element -- static export; the still is pre-sized
+                        <img className={styles.pebble} src={`/stills/pocket-${colour}.webp`} alt="" width={800} height={560} decoding="async" />
                       )}
                       <span className="visually-hidden">{on ? ", locked" : ", not locked"}</span>
                     </button>

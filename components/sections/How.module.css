@@ -20,7 +20,7 @@
 }
 
 .trail {
-  --visual-h: clamp(11rem, 7rem + 9vw, 16rem);
+  --visual-h: clamp(10rem, 5rem + 9vw, 14rem);
 }
 
 .step {
@@ -29,15 +29,19 @@
   align-items: end;
 }
 
+/* Every visual stands on the trail line itself, just past its waypoint. */
 .visual {
+  position: relative;
   display: grid;
   place-items: end start;
   height: 100%;
-  padding-bottom: var(--space-4);
+  margin-bottom: -1.1rem;
+  padding-left: 3.4rem;
 }
 
 .waypoint {
   position: relative;
+  z-index: 1;
   display: grid;
   place-items: center;
   width: 2.2rem;
@@ -49,6 +53,11 @@
   width: 1.4rem;
   height: 1.8rem;
   box-shadow: 0 0 0 2px var(--black);
+}
+
+/* Off the current step, the mark is plain black on white. */
+.waypoint:not([data-here]) :global(.blaze) > span {
+  background: var(--black);
 }
 
 .text {
@@ -78,7 +87,7 @@
 
 .tiles {
   display: grid;
-  grid-template-columns: repeat(2, 4.2rem);
+  grid-template-columns: repeat(2, 4.6rem);
   gap: 0.6rem;
 }
 
@@ -101,9 +110,26 @@
   height: 1.8rem;
 }
 
+/* The focus of the trail: larger, its shadow resting on the line. The pebble
+   sits inside its frame, so the frame reaches past the column to line it up. */
 .stone {
-  width: min(100%, 17rem);
-  margin-bottom: -1.5rem;
+  width: min(100%, 22rem);
+  margin-bottom: -2.2rem;
+  margin-left: -1.5rem;
+}
+
+/* The signpost stands on the trail: a plate on a post. */
+.post {
+  display: grid;
+  justify-items: start;
+}
+
+.post::after {
+  content: "";
+  width: 0.4rem;
+  height: clamp(4rem, 2rem + 4vw, 6rem);
+  margin-left: 2.2rem;
+  background: var(--black);
 }
 
 .back {
@@ -150,7 +176,8 @@
   .visual {
     grid-column: 2;
     grid-row: 1;
-    padding-bottom: var(--space-3);
+    margin-bottom: 0;
+    padding: 0 0 var(--space-3);
   }
 
   .waypoint {

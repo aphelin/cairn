@@ -5,7 +5,7 @@ import styles from "./Footer.module.css";
 // The end of the trail: a black enamel plate.
 export function Footer() {
   return (
-    <footer className={`section ${styles.footer}`} data-ground="black">
+    <footer className={`section contoured ${styles.footer}`} data-ground="black">
       <div className="inner">
         <p className={styles.close}>
           <CairnMark className={styles.mark} />

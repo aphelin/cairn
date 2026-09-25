@@ -306,8 +306,11 @@
   height: 1.3rem;
 }
 
-.stage [data-tone="red"] {
-  --tone: #d7262b;
+.stage [data-tone="purple"] {
+  --tone: #6b3fa0;
+}
+.stage [data-tone="black"] {
+  --tone: #141414;
 }
 .stage [data-tone="blue"] {
   --tone: #1f5aa6;
@@ -397,7 +400,7 @@
 /* ——— Phones and tall screens ——— */
 @media (max-aspect-ratio: 4 / 5) {
   .track {
-    --stone-w: min(52vw, 26svh);
+    --stone-w: min(54vw, 26svh);
   }
 
   .copy {
@@ -435,7 +438,7 @@
   .phone {
     left: 50%;
     bottom: calc(3svh + var(--stone-w) * 0.7 * 0.62 + 4svh);
-    --pw: calc(var(--stone-w) * 0.44);
+    --pw: calc(var(--stone-w) * 0.52);
   }
 
   .hint {

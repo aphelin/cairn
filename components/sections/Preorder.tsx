@@ -4,6 +4,7 @@ import { useId, useRef, useState } from "react";
 import { COLOURS, PRICE, SHIP_WINDOW } from "@/lib/content";
 import { store, useStore } from "@/lib/store";
 import { Arrow, Check, Minus, Plus } from "@/components/icons";
+import { StoneAnchor } from "@/components/stone/StoneAnchor";
 import styles from "./Preorder.module.css";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -40,7 +41,7 @@ export function Preorder() {
   };
 
   return (
-    <section id="preorder" className="section" data-ground="yellow" aria-labelledby="preorder-title">
+    <section id="preorder" className="section contoured" data-ground="yellow" aria-labelledby="preorder-title">
       <div className={`inner ${styles.grid}`}>
         <div>
           <h2 id="preorder-title" className="title">
@@ -49,6 +50,7 @@ export function Preorder() {
           <p className="lede">
             ${PRICE.single} a stone. Any two for ${PRICE.pair}. {SHIP_WINDOW}, and you pay nothing until then.
           </p>
+          <StoneAnchor stone="main" order={4} still={`/stills/pocket-${colour}.webp`} className={styles.stone} />
         </div>
 
         {done ? (

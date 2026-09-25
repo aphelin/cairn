@@ -11,15 +11,15 @@ import styles from "./Hero.module.css";
 // Where each banner lands, as % of the stage: [x, y, tilt] on wide screens,
 // then on phones (where only the first five show).
 const SPOTS: { wide: [number, number, number]; tall: [number, number, number] }[] = [
-  { wide: [60, 21, -4], tall: [72, 45, -4] },
+  { wide: [60, 21, -4], tall: [76, 16, -4] },
   { wide: [89, 30, 5], tall: [22, 55, 5] },
   { wide: [52, 63, 3], tall: [82, 66, 3] },
   { wide: [91, 64, -6], tall: [18, 77, -5] },
   { wide: [63, 86, -3], tall: [80, 89, 3] },
   { wide: [33, 91, 4], tall: [0, 0, 0] },
   { wide: [88, 91, 2], tall: [0, 0, 0] },
-  { wide: [44, 12, -2], tall: [0, 0, 0] },
-  { wide: [13, 95, -5], tall: [0, 0, 0] },
+  { wide: [37, 28, -3], tall: [0, 0, 0] },
+  { wide: [34, 45, 4], tall: [0, 0, 0] },
 ];
 
 const glyphFor = (app: string) => app.toLowerCase().split(" ").pop() ?? "chat";

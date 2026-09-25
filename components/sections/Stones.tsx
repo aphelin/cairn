@@ -12,6 +12,7 @@ import styles from "./Stones.module.css";
 export function Stones() {
   const [range, setRange] = useState(4);
   const rangeId = useId();
+  const maskId = `range-${useId().replace(/:/g, "")}`;
   const pocket = MODELS[0]!;
   const home = MODELS[1]!;
 
@@ -31,14 +32,25 @@ export function Stones() {
 
           <article className={styles.model} aria-labelledby="model-home">
             <div className={styles.visual}>
-              <svg className={styles.range} viewBox="-200 -140 400 280" aria-hidden="true">
-                <g style={{ transform: `scale(${0.45 + (range / 15) * 0.75})` }}>
-                  {[1, 2, 3, 4].map((i) => (
-                    <ellipse key={i} cx="0" cy="0" rx={60 + i * 32} ry={(60 + i * 32) * 0.62} />
-                  ))}
-                </g>
-              </svg>
-              <StoneAnchor stone="home" still="/stills/home-granite.webp" className={styles.stone} />
+              <div className={styles.homeFrame}>
+                {/* Range rings on the ground around the stone; the mask keeps them behind it. */}
+                <svg className={styles.range} viewBox="-50 -35 100 70" aria-hidden="true">
+                  <defs>
+                    <mask id={maskId} maskUnits="userSpaceOnUse" x="-400" y="-300" width="800" height="600">
+                      <rect x="-400" y="-300" width="800" height="600" fill="white" />
+                      <ellipse cx="2" cy="-3.5" rx="41.5" ry="26.5" fill="black" />
+                    </mask>
+                  </defs>
+                  <g mask={`url(#${maskId})`}>
+                    <g className={styles.rings} style={{ transform: `translate(2px, 16px) scale(${0.55 + (range / 15) * 0.9})` }}>
+                      {[1, 2, 3, 4].map((i) => (
+                        <ellipse key={i} cx="0" cy="0" rx={34 + i * 15} ry={(34 + i * 15) * 0.4} />
+                      ))}
+                    </g>
+                  </g>
+                </svg>
+                <StoneAnchor stone="home" still="/stills/home-granite.webp" />
+              </div>
             </div>
             <Details model={home} id="model-home" />
             <div className={styles.slider}>
@@ -65,11 +77,10 @@ export function Stones() {
 function Details({ model, id }: { model: (typeof MODELS)[number]; id: string }) {
   return (
     <div className={styles.details}>
-      <p className={styles.verb}>{model.verb}</p>
       <h3 id={id}>{model.name}</h3>
       <p className={styles.text}>{model.text}</p>
       <ul className={styles.facts}>
-        {model.facts.map((f) => (
+        {[model.verb, ...model.facts].map((f) => (
           <li key={f}>{f}</li>
         ))}
       </ul>
