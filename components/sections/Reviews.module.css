@@ -1,0 +1,55 @@
+.note {
+  margin-top: var(--space-4);
+  font-size: var(--step-0);
+  color: var(--ink-2);
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  margin-top: var(--space-8);
+  padding: 0;
+  list-style: none;
+}
+
+.list li:nth-child(2) {
+  margin-top: var(--space-8);
+}
+
+.list li:nth-child(3) {
+  margin-top: var(--space-5);
+}
+
+.list blockquote {
+  margin: 0;
+  padding-top: var(--space-5);
+  border-top: 3px solid var(--yellow);
+}
+
+.list blockquote p {
+  font-family: var(--font-sign);
+  font-size: var(--step-2);
+  font-weight: 600;
+  line-height: 1.12;
+}
+
+.list figcaption {
+  margin-top: var(--space-4);
+  font-size: var(--step-0);
+  color: var(--ink-2);
+}
+
+.list figcaption strong {
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .list {
+    grid-template-columns: 1fr;
+  }
+
+  .list li:nth-child(n) {
+    margin-top: 0;
+  }
+}

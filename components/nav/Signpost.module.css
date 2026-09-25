@@ -1,0 +1,270 @@
+/* The signpost. No bar, no slab: plates float on the page's own ground.
+   On yellow the arrow plates are black; on every other ground, sign yellow. */
+
+.header {
+  --p-bg: var(--yellow);
+  --p-ink: var(--black);
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  padding: 0.75rem var(--gutter);
+  pointer-events: none;
+  transition: background-color 200ms var(--ease-out);
+}
+
+.header[data-on="yellow"] {
+  --p-bg: var(--black);
+  --p-ink: var(--yellow);
+  background: var(--yellow);
+}
+
+/* The strip behind the plates is the ground itself, so words never run under them. */
+.header[data-on="chalk"] {
+  background: var(--chalk);
+}
+
+.header[data-on="blue"] {
+  background: var(--blue);
+}
+
+.header[data-on="green"] {
+  background: var(--green);
+}
+
+.header[data-on="black"] {
+  background: var(--black);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  max-width: 1440px;
+  margin-inline: auto;
+}
+
+.nav > *,
+.panel {
+  pointer-events: auto;
+}
+
+/* The location plate: white, square, the place you are. */
+.location {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.6rem;
+  padding: 0.3rem 0.9rem 0.3rem 0.7rem;
+  background: var(--white);
+  color: var(--black);
+  box-shadow: inset 0 0 0 2px var(--black);
+  font-family: var(--font-sign);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.location svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.route {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0 0 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.plate {
+  --tip: 0.8rem;
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  min-height: 2.6rem;
+  padding: 0.55rem calc(var(--tip) + 0.7rem) 0.5rem 0.8rem;
+  background: var(--p-bg);
+  color: var(--p-ink);
+  font-family: var(--font-sign);
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-decoration: none;
+  white-space: nowrap;
+  clip-path: polygon(0 0, calc(100% - var(--tip)) 0, 100% 50%, calc(100% - var(--tip)) 100%, 0 100%);
+  transition:
+    background-color 300ms var(--ease-out),
+    color 300ms var(--ease-out),
+    transform 260ms var(--ease-out);
+}
+
+/* A plate behind you points back. */
+.plate[data-back] {
+  padding: 0.55rem 0.8rem 0.5rem calc(var(--tip) + 0.7rem);
+  clip-path: polygon(var(--tip) 0, 100% 0, 100% 100%, var(--tip) 100%, 0 50%);
+}
+
+.plate:hover {
+  transform: translateX(0.2rem);
+}
+
+.plate[data-back]:hover {
+  transform: translateX(-0.2rem);
+}
+
+.plate:focus-visible {
+  outline: none;
+  background: var(--white);
+  color: var(--black);
+}
+
+.time {
+  font-weight: 600;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
+
+/* You are here: the one place blaze red appears in the nav. */
+.here {
+  align-self: center;
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 50%;
+  background: var(--blaze);
+  box-shadow: 0 0 0 2px var(--white);
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.sound,
+.menu {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.6rem;
+  min-height: 2.6rem;
+  padding: 0 0.7rem;
+  border: 0;
+  background: var(--white);
+  color: var(--black);
+  box-shadow: inset 0 0 0 2px var(--black);
+  font-family: var(--font-sign);
+  font-size: 1.02rem;
+  font-weight: 700;
+}
+
+.sound {
+  padding: 0;
+}
+
+.sound svg {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+.sound[aria-pressed="true"] {
+  background: var(--black);
+  color: var(--yellow);
+}
+
+.sound:focus-visible,
+.menu:focus-visible,
+.location:focus-visible {
+  outline: 3px solid var(--blaze);
+  outline-offset: 2px;
+}
+
+.menu {
+  display: none;
+}
+
+.panel {
+  margin-top: 0.6rem;
+}
+
+.panel ul {
+  display: grid;
+  justify-items: end;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.panel .plate {
+  min-height: 3rem;
+  font-size: 1.15rem;
+}
+
+/* ——— The spine ——— */
+.spine {
+  position: fixed;
+  left: calc(var(--gutter) / 2 - 1px);
+  top: calc(var(--nav-h) + 2.5rem);
+  bottom: 2rem;
+  z-index: 40;
+  width: 2px;
+  background: currentColor;
+  color: rgb(20 20 20 / 0.25);
+  pointer-events: none;
+  transition: color 300ms var(--ease-out);
+}
+
+.spine[data-on="blue"],
+.spine[data-on="green"],
+.spine[data-on="black"] {
+  color: rgb(255 255 255 / 0.35);
+}
+
+/* The marker is a painted blaze: white, red, white. */
+.marker {
+  position: absolute;
+  left: 50%;
+  display: grid;
+  grid-template-rows: 1fr 1fr 1fr;
+  width: 0.95rem;
+  height: 1.3rem;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 1px rgb(20 20 20 / 0.35);
+}
+
+.marker::before,
+.marker::after {
+  content: "";
+  background: var(--white);
+}
+
+.marker i {
+  background: var(--blaze);
+}
+
+@media (max-width: 980px) {
+  .route {
+    display: none;
+  }
+
+  .tools {
+    margin-left: auto;
+  }
+
+  .menu {
+    display: inline-grid;
+  }
+
+  .spine {
+    display: none;
+  }
+}
+
+@media (min-width: 981px) {
+  .panel {
+    display: none;
+  }
+}

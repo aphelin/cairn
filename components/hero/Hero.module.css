@@ -1,0 +1,493 @@
+/* The hero: a sign-yellow field, a phone that won't stop buzzing, and the stone.
+   The track carries the yellow; the rings sit under the stone canvas (z 1) and
+   the stage sits over it, so the phone can press down onto the stone's crown. */
+
+.track {
+  --stone-w: min(25vw, 44vh);
+  position: relative;
+  height: 210svh;
+}
+
+.ringsLayer {
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  height: 100svh;
+  min-height: 36rem;
+  pointer-events: none;
+}
+
+.rings {
+  width: 100%;
+  height: 100%;
+}
+
+.stage {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  height: 100svh;
+  min-height: 36rem;
+  margin-top: calc(-1 * max(100svh, 36rem));
+  overflow: clip;
+}
+
+/* ——— Words and the offer ——— */
+.copy {
+  position: absolute;
+  left: var(--gutter);
+  top: 50%;
+  z-index: 2;
+  width: min(44vw, 38rem);
+  transform: translateY(-50%);
+}
+
+.title {
+  font-size: clamp(3.4rem, 1.2rem + 5.4vw, 6rem);
+  line-height: 0.9;
+  letter-spacing: -0.015em;
+}
+
+.title span {
+  display: block;
+}
+
+.offer {
+  max-width: 30ch;
+  margin-top: var(--space-6);
+  font-size: var(--step-1);
+  line-height: 1.35;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-7);
+}
+
+.actions :global(.plate) {
+  min-height: 3.4rem;
+  font-size: var(--step-1);
+}
+
+.actions :global(.plate-square) {
+  font-size: var(--step-0);
+  min-height: 3.4rem;
+}
+
+/* ——— The phone and the stone ——— */
+.scene {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.stone {
+  position: absolute;
+  left: 74%;
+  bottom: 5vh;
+  width: var(--stone-w);
+  transform: translateX(-50%);
+}
+
+.phone {
+  --pw: calc(var(--stone-w) * 0.5);
+  position: absolute;
+  left: 74%;
+  bottom: calc(5vh + var(--stone-w) * 0.7 * 0.62 + 7vh);
+  width: var(--pw);
+  margin-left: calc(var(--pw) / -2);
+  aspect-ratio: 9 / 18.6;
+  padding: calc(var(--pw) * 0.035);
+  border-radius: calc(var(--pw) * 0.15);
+  background: #141414;
+  box-shadow:
+    0 0 0 1.5px #3a3a3a inset,
+    0 24px 40px -18px rgb(20 20 20 / 0.55);
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  will-change: transform;
+}
+
+.phone[data-dragging] {
+  cursor: grabbing;
+}
+
+/* The buzz: short bursts of shaking, twice every couple of seconds. */
+.stage:not([data-quiet]) .screen {
+  animation: buzz 2.6s steps(1) infinite;
+}
+
+.screen {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border-radius: calc(var(--pw) * 0.12);
+  padding: calc(var(--pw) * 0.07) calc(var(--pw) * 0.07);
+  background: #1f1e1c;
+  color: #f4f1e8;
+  font-size: calc(var(--pw) * 0.062);
+  transition: background-color 500ms var(--ease-out);
+}
+
+.stage[data-quiet] .screen {
+  background: #2a2926;
+}
+
+.status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.statusIcons {
+  display: flex;
+  gap: 0.3em;
+}
+
+.statusIcons svg {
+  width: 1.2em;
+  height: 1.2em;
+}
+
+.clock {
+  margin-top: 0.5em;
+  font-family: var(--font-sign);
+  font-size: 3.6em;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.mini {
+  display: grid;
+  gap: 0.4em;
+  margin-top: 1.2em;
+  padding: 0;
+  list-style: none;
+}
+
+.mini li {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.55em 0.6em;
+  border-radius: 0.7em;
+  background: rgb(244 241 232 / 0.14);
+  font-weight: 600;
+}
+
+.mini svg {
+  width: 1.3em;
+  height: 1.3em;
+  flex: none;
+}
+
+.mini .more {
+  justify-content: center;
+  background: none;
+  font-weight: 500;
+  opacity: 0.75;
+}
+
+.locked {
+  display: grid;
+  justify-items: center;
+  gap: 0.2em;
+  margin-top: 1.8em;
+  padding: 1.1em 0.6em;
+  border-radius: 0.8em;
+  background: var(--yellow);
+  color: var(--black);
+  animation: settle 700ms var(--ease-settle) both;
+}
+
+.lockedMark {
+  width: 2.2em;
+  height: 2.2em;
+}
+
+.locked strong {
+  font-family: var(--font-sign);
+  font-size: 1.7em;
+  line-height: 1;
+}
+
+.hint {
+  position: absolute;
+  left: calc(74% + var(--stone-w) * 0.32);
+  bottom: calc(5vh + var(--stone-w) * 0.7 * 0.62 + 7vh + var(--stone-w) * 0.5 * 1.1);
+  max-width: 11ch;
+  font-family: var(--font-sign);
+  font-size: var(--step-0);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--ink-2);
+}
+
+.hint::before {
+  content: "";
+  display: block;
+  width: 1.6em;
+  height: 1.6em;
+  margin-bottom: 0.3em;
+  margin-left: -0.2em;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 5c-7 0-11 4-12 12M3.5 13.5 7 17l3.5-3.5'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+
+.stage[data-quiet] .hint {
+  opacity: 0;
+  transition: opacity 400ms var(--ease-out);
+}
+
+/* ——— The noise: notifications strewn over the field ——— */
+.noise {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+
+.banner {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: clamp(15rem, 12rem + 7vw, 20rem);
+  transform: translate(-50%, -50%) rotate(var(--r));
+}
+
+.mover {
+  display: block;
+  will-change: transform;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 0.94);
+  color: var(--black);
+  font-size: 0.86rem;
+  line-height: 1.25;
+  box-shadow:
+    0 1px 2px rgb(20 20 20 / 0.1),
+    0 14px 28px -12px rgb(20 20 20 / 0.45);
+  animation: buzz 2.6s steps(1) var(--delay) infinite;
+}
+
+.glyph {
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 0.55rem;
+  color: var(--white);
+}
+
+.glyph svg {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+.stage [data-tone="red"] {
+  --tone: #d7262b;
+}
+.stage [data-tone="blue"] {
+  --tone: #1f5aa6;
+}
+.stage [data-tone="green"] {
+  --tone: #1d7a4a;
+}
+.stage [data-tone="yellow"] {
+  --tone: #b88a00;
+}
+
+.glyph[data-tone] {
+  background: var(--tone);
+}
+
+.mini svg[data-tone] {
+  color: var(--tone);
+  filter: brightness(1.6);
+}
+
+.bannerText {
+  display: grid;
+  min-width: 0;
+}
+
+.bannerText strong {
+  font-weight: 600;
+}
+
+.bannerText span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #4b4841;
+}
+
+.now {
+  align-self: start;
+  font-size: 0.75rem;
+  color: #6a665d;
+}
+
+:global(html:not(.js)) .noise {
+  display: none;
+}
+
+@keyframes buzz {
+  0%,
+  6%,
+  14%,
+  100% {
+    transform: none;
+  }
+  1%,
+  8% {
+    transform: translate(-2px, 1px) rotate(-0.6deg);
+  }
+  2%,
+  9% {
+    transform: translate(2px, -1px) rotate(0.6deg);
+  }
+  3%,
+  10% {
+    transform: translate(-2px, -1px) rotate(-0.4deg);
+  }
+  4%,
+  11% {
+    transform: translate(2px, 1px) rotate(0.4deg);
+  }
+  5%,
+  12% {
+    transform: translate(-1px, 0) rotate(0);
+  }
+}
+
+@keyframes settle {
+  from {
+    transform: translateY(1.2em) scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* ——— Phones and tall screens ——— */
+@media (max-aspect-ratio: 4 / 5) {
+  .track {
+    --stone-w: min(52vw, 26svh);
+  }
+
+  .copy {
+    top: calc(var(--nav-h) + 3svh);
+    right: var(--gutter);
+    width: auto;
+    transform: none;
+  }
+
+  .title {
+    font-size: clamp(3rem, 13.5vw, 4.6rem);
+  }
+
+  .offer {
+    margin-top: var(--space-4);
+    font-size: var(--step-0);
+  }
+
+  .actions {
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+  }
+
+  .actions :global(.plate),
+  .actions :global(.plate-square) {
+    min-height: 3rem;
+    font-size: var(--step-0);
+  }
+
+  .stone {
+    left: 50%;
+    bottom: 3svh;
+  }
+
+  .phone {
+    left: 50%;
+    bottom: calc(3svh + var(--stone-w) * 0.7 * 0.62 + 4svh);
+    --pw: calc(var(--stone-w) * 0.44);
+  }
+
+  .hint {
+    left: calc(50% + var(--stone-w) * 0.3);
+    bottom: calc(3svh + var(--stone-w) * 0.7 * 0.62 + 4svh + var(--stone-w) * 0.44 * 1.2);
+    font-size: 0.9rem;
+  }
+
+  .banner {
+    left: var(--tx);
+    top: var(--ty);
+    width: 12rem;
+    transform: translate(-50%, -50%) rotate(var(--tr));
+  }
+
+  .banner:nth-child(n + 6) {
+    display: none;
+  }
+
+  .hint {
+    display: none;
+  }
+
+  .card {
+    padding: 0.55rem 0.7rem;
+    font-size: 0.78rem;
+  }
+
+  .glyph {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+}
+
+/* ——— Reduced motion: no pinned scroll; it starts quiet ——— */
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    height: auto;
+  }
+
+  .ringsLayer {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+  }
+
+  .stage {
+    position: relative;
+    margin-top: 0;
+  }
+
+  .noise {
+    display: none;
+  }
+}

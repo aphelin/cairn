@@ -1,0 +1,44 @@
+.footer {
+  padding-bottom: var(--space-7);
+}
+
+.close {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.2em 0.35em;
+  font-family: var(--font-sign);
+  font-size: clamp(3rem, 1.2rem + 7vw, 7.5rem);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-7);
+}
+
+.mark {
+  width: 0.85em;
+  height: 0.85em;
+  color: var(--yellow);
+}
+
+.fine {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-9);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--rule);
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+.fine p {
+  max-width: 70ch;
+}
+
+.fine a {
+  color: var(--ink);
+}
+
+.fine a:focus-visible {
+  outline-color: var(--yellow);
+}

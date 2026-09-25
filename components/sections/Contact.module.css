@@ -1,0 +1,93 @@
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: var(--space-8) clamp(2rem, 7vw, 8rem);
+  align-items: start;
+}
+
+.newsletter,
+.done {
+  margin-top: var(--space-8);
+  max-width: 30rem;
+}
+
+.newsletter h3,
+.contact h3 {
+  font-size: var(--step-2);
+}
+
+.small {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-4);
+  color: var(--ink-2);
+}
+
+.inline {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.inline :global(.input) {
+  flex: 1;
+  min-width: 0;
+}
+
+.contact {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.done {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--step-1);
+  font-weight: 600;
+}
+
+.done svg,
+.sent svg {
+  width: 2.2rem;
+  height: 2.2rem;
+  flex: none;
+  padding: 0.35rem;
+  background: var(--yellow);
+  color: var(--black);
+  stroke-width: 2.5;
+}
+
+.sent {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  font-size: var(--step-1);
+}
+
+.sentTitle {
+  font-family: var(--font-sign);
+  font-size: var(--step-3);
+  font-weight: 700;
+  line-height: 1;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .inline {
+    flex-direction: column;
+  }
+}

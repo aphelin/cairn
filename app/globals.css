@@ -1,0 +1,461 @@
+/* Cairn: Waymark.
+   The page is a marked trail. Every section is one flat field in a trail
+   colour; blaze red means "you are here" and nothing else; signpost plates are
+   the nav, the buttons and the labels; contour lines are the only ornament. */
+
+:root {
+  --yellow: #f2c200;
+  --yellow-deep: #d9ad00;
+  --blue: #1f5aa6;
+  --blue-deep: #184a8a;
+  --green: #1d5b3b;
+  --green-deep: #164a2f;
+  --chalk: #f4f1e8;
+  --chalk-deep: #e7e2d4;
+  --black: #141414;
+  --white: #ffffff;
+  --blaze: #d7262b;
+
+  --font-sign: var(--font-barlow-condensed), "Arial Narrow", sans-serif;
+  --font-text: var(--font-barlow), system-ui, sans-serif;
+
+  /* Type scale (fluid, 390 → 1600) */
+  --step--1: clamp(0.84rem, 0.8rem + 0.15vw, 0.94rem);
+  --step-0: clamp(1.05rem, 1rem + 0.22vw, 1.2rem);
+  --step-1: clamp(1.25rem, 1.1rem + 0.55vw, 1.6rem);
+  --step-2: clamp(1.7rem, 1.35rem + 1.3vw, 2.6rem);
+  --step-3: clamp(2.4rem, 1.7rem + 2.8vw, 4.2rem);
+  --step-4: clamp(3.1rem, 1.6rem + 5.6vw, 6rem);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+  --space-9: 7rem;
+
+  --gutter: clamp(1.25rem, 0.4rem + 3.4vw, 4.5rem);
+  --nav-h: 4rem;
+  --spine: 0.5rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+
+  color-scheme: light;
+}
+
+/* ——— Grounds: each section declares one, and its ink and plates follow ——— */
+[data-ground="yellow"] {
+  --bg: var(--yellow);
+  --ink: var(--black);
+  --ink-2: #3f3300;
+  --rule: rgb(20 20 20 / 0.28);
+  --contour: rgb(20 20 20 / 0.16);
+  --plate: var(--black);
+  --plate-ink: var(--yellow);
+  --plate-2: var(--black);
+  --focus: var(--black);
+}
+
+[data-ground="chalk"] {
+  --bg: var(--chalk);
+  --ink: var(--black);
+  --ink-2: #4b4841;
+  --rule: rgb(20 20 20 / 0.2);
+  --contour: rgb(20 20 20 / 0.13);
+  --plate: var(--black);
+  --plate-ink: var(--yellow);
+  --plate-2: var(--black);
+  --focus: var(--blue);
+}
+
+[data-ground="blue"] {
+  --bg: var(--blue);
+  --ink: var(--white);
+  --ink-2: #d3e1f5;
+  --rule: rgb(255 255 255 / 0.3);
+  --contour: rgb(255 255 255 / 0.16);
+  --plate: var(--yellow);
+  --plate-ink: var(--black);
+  --plate-2: var(--white);
+  --focus: var(--yellow);
+}
+
+[data-ground="green"] {
+  --bg: var(--green);
+  --ink: var(--white);
+  --ink-2: #cfe5d6;
+  --rule: rgb(255 255 255 / 0.28);
+  --contour: rgb(255 255 255 / 0.14);
+  --plate: var(--yellow);
+  --plate-ink: var(--black);
+  --plate-2: var(--white);
+  --focus: var(--yellow);
+}
+
+[data-ground="black"] {
+  --bg: var(--black);
+  --ink: var(--chalk);
+  --ink-2: #bcb7aa;
+  --rule: rgb(244 241 232 / 0.22);
+  --contour: rgb(244 241 232 / 0.1);
+  --plate: var(--yellow);
+  --plate-ink: var(--black);
+  --plate-2: var(--chalk);
+  --focus: var(--yellow);
+}
+
+[data-ground] {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--nav-h) + 1rem);
+  background: var(--yellow);
+  scrollbar-color: var(--black) var(--chalk-deep);
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+body {
+  min-height: 100svh;
+  font-family: var(--font-text);
+  font-size: var(--step-0);
+  line-height: 1.5;
+  background: var(--chalk);
+  color: var(--black);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: lining-nums;
+  caret-color: var(--blaze);
+}
+
+::selection {
+  background: var(--black);
+  color: var(--yellow);
+}
+
+[data-ground="black"] ::selection,
+[data-ground="blue"] ::selection,
+[data-ground="green"] ::selection {
+  background: var(--yellow);
+  color: var(--black);
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.2em;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus, var(--black));
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-sign);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+.skip-link {
+  position: fixed;
+  left: var(--space-4);
+  top: var(--space-4);
+  z-index: 100;
+  padding: var(--space-2) var(--space-4);
+  background: var(--black);
+  color: var(--yellow);
+  font-family: var(--font-sign);
+  font-weight: 700;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus-visible {
+  transform: none;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ——— Layout ——— */
+.section {
+  position: relative;
+  padding-block: clamp(5rem, 3rem + 6vw, 9rem);
+  padding-inline: var(--gutter);
+  overflow: clip;
+}
+
+.inner {
+  position: relative;
+  z-index: 2; /* above the stone canvas, so a travelling stone passes behind words */
+  max-width: 1320px;
+  margin-inline: auto;
+}
+
+.title {
+  font-size: var(--step-3);
+  max-width: 14ch;
+}
+
+.lede {
+  max-width: 34ch;
+  margin-top: var(--space-5);
+  font-size: var(--step-1);
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+
+.fine {
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+/* ——— Signpost plates: the page's buttons and labels ———
+   A plate is a flat enamel sign; an arrow plate points where it takes you. */
+.plate {
+  --tip: 0.85em;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  min-height: 3rem;
+  padding: 0.55em calc(var(--tip) + 0.9em) 0.55em 1.1em;
+  border: 0;
+  background: var(--plate);
+  color: var(--plate-ink);
+  font-family: var(--font-sign);
+  font-size: var(--step-0);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+  clip-path: polygon(0 0, calc(100% - var(--tip)) 0, 100% 50%, calc(100% - var(--tip)) 100%, 0 100%);
+  transition:
+    transform 260ms var(--ease-out),
+    background-color 200ms var(--ease-out);
+}
+
+.plate:hover {
+  transform: translateX(0.3em);
+}
+
+.plate:active {
+  transform: translateX(0.15em) scale(0.98);
+}
+
+.plate:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Clip-path hides an outline, so the focus ring is a drop shadow on a wrapper. */
+.plate-wrap {
+  display: inline-block;
+  filter: drop-shadow(0 0 0 transparent);
+  transition: filter 160ms var(--ease-out);
+}
+
+.plate-wrap:has(.plate:focus-visible) {
+  filter: drop-shadow(3px 0 0 var(--focus)) drop-shadow(-3px 0 0 var(--focus)) drop-shadow(0 3px 0 var(--focus))
+    drop-shadow(0 -3px 0 var(--focus));
+}
+
+/* The square plate: no arrow, for actions that stay here. */
+.plate-square {
+  padding-right: 1.1em;
+  clip-path: none;
+  box-shadow: inset 0 0 0 2px var(--plate-2);
+  background: transparent;
+  color: var(--plate-2);
+}
+
+.plate-square:hover {
+  transform: none;
+  background: color-mix(in srgb, var(--plate-2) 12%, transparent);
+}
+
+.plate-square:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.plate[disabled],
+.plate[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.plate svg {
+  flex: none;
+  width: 1.1em;
+  height: 1.1em;
+}
+
+/* ——— The blaze: white, red, white, the trail's own stripe ——— */
+.blaze {
+  display: inline-grid;
+  grid-template-rows: 1fr 1fr 1fr;
+  width: 1.4rem;
+  height: 1.05rem;
+  flex: none;
+}
+
+.blaze::before,
+.blaze::after {
+  content: "";
+  background: var(--white);
+}
+
+.blaze > span {
+  background: var(--blaze);
+}
+
+.blaze::before {
+  order: -1;
+}
+
+/* ——— Forms ——— */
+.field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.field > label {
+  font-family: var(--font-sign);
+  font-size: var(--step-0);
+  font-weight: 600;
+}
+
+.input {
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0.7rem 0.9rem;
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: color-mix(in srgb, var(--bg) 70%, var(--white));
+  color: var(--black);
+  font-size: var(--step-0);
+  transition:
+    border-color 160ms var(--ease-out),
+    box-shadow 160ms var(--ease-out);
+}
+
+[data-ground="blue"] .input,
+[data-ground="green"] .input,
+[data-ground="black"] .input {
+  border-color: var(--white);
+  background: var(--white);
+}
+
+.input::placeholder {
+  color: #5d5a52;
+}
+
+.input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus);
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--blaze);
+  box-shadow: 0 0 0 1px var(--blaze);
+}
+
+textarea.input {
+  min-height: 8rem;
+  resize: vertical;
+}
+
+.field-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: var(--step--1);
+  font-weight: 600;
+}
+
+.field-error::before {
+  content: "";
+  width: 0.6em;
+  height: 0.6em;
+  flex: none;
+  border-radius: 50%;
+  background: var(--blaze);
+  box-shadow: 0 0 0 2px var(--white);
+}
+
+.demo-note {
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+/* ——— Motion preference ——— */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
