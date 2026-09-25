@@ -26,10 +26,17 @@ try {
 
     for (const state of ["noisy", "quiet"]) {
       if (state === "quiet") {
+        // Scrolling back through the hero toggles the scroll-driven quiet; wait
+        // for it to settle noisy at the top before pressing the button.
         await page.evaluate(() => window.scrollTo(0, 0));
+        await page.waitForFunction(() => document.documentElement.dataset.quiet === "false", null, { timeout: 15000 });
         await page.locator("#top").getByRole("button", { name: "Tap to quiet" }).click();
         await page.waitForFunction(() => document.documentElement.dataset.quiet === "true");
-        await page.waitForTimeout(2500);
+        await page.waitForFunction(
+          () => [...document.querySelectorAll("#top ul[aria-hidden] > li")].every((li) => getComputedStyle(li).visibility === "hidden" || getComputedStyle(li).display === "none"),
+          null,
+          { timeout: 15000 },
+        );
       }
       const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
       const serious = result.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
