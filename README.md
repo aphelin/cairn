@@ -33,7 +33,6 @@ It's a portfolio piece: a design and front-end concept. Nothing ships and the fo
 - Mona Sans (with its width axis) for everything, and Doto, a dot-matrix face, for the device's readouts.
 - Sound is off by default. When turned on, it's synthesised with Web Audio (the notification chime, the buzz, each detent's click and Pocket's tap), so there are no audio files.
 - The stills in `public/stills/` are rendered from the site's own WebGL scene by `scripts/render-stills.mjs`. Each carries its provenance in a sidecar and in the file.
-- Decision images were made through the author's Cursor subscription (`scripts/cursor-image.mjs`, driving Grok's GenerateImage). None of them ship.
 
 ## Run it
 
@@ -45,7 +44,7 @@ pnpm build && pnpm start          # the static export, served compressed
 
 ## Checks
 
-`GATES.md` lists every check. Each one is a script in `scripts/`:
+Each check is a script in `scripts/`:
 
 | Script | Proves |
 | --- | --- |

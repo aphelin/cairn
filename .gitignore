@@ -6,5 +6,12 @@ node_modules
 out
 *.tsbuildinfo
 next-env.d.ts
-.impeccable/tmp
-.impeccable/review/diff
+
+# Local design and agent tooling: kept on disk, never shipped
+.impeccable/
+.unlazy/
+GATES.md
+AGENTS.md
+CLAUDE.md
+scripts/fal-image.mjs
+scripts/cursor-image.mjs
