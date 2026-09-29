@@ -1,0 +1,80 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-weight: 720;
+  font-variation-settings: "wdth" 112;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.word {
+  font-size: 1.32em;
+  translate: 0 -0.02em;
+}
+
+.mark {
+  --ring: var(--ink);
+  --ring-edge: transparent;
+  --cap: #eceef0;
+  width: 1.75em;
+  height: 1.75em;
+  flex: none;
+  overflow: visible;
+}
+
+:global([data-theme="night"]) .mark {
+  --ring: #202024;
+  --ring-edge: rgb(244 244 242 / 0.24);
+}
+
+.track,
+.fill {
+  fill: none;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+
+.track {
+  stroke: currentColor;
+  opacity: 0.3;
+}
+
+/* The lit part of the sweep: the mode's colour, up to where the dial is set. */
+.fill {
+  stroke: var(--mode, var(--accent));
+  transition: stroke-dasharray 600ms var(--ease-out);
+}
+
+.ring {
+  fill: var(--ring);
+  stroke: var(--ring-edge);
+  stroke-width: 0.7;
+}
+
+.knurl line {
+  stroke: rgb(255 255 255 / 0.16);
+  stroke-width: 0.4;
+}
+
+.cap {
+  fill: var(--cap);
+}
+
+/* Off, the dot is a dark mark on the ceramic; on, it lights. */
+.dot {
+  fill: var(--ink);
+  transform-box: view-box;
+  transform-origin: 16px 16px;
+  transition:
+    fill 300ms var(--ease-out),
+    transform 600ms var(--ease-out);
+}
+
+.mark[data-on] .dot {
+  fill: var(--mode, var(--accent));
+}
+
+.mark:not([data-on]) .fill {
+  opacity: 0;
+}

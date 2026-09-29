@@ -1,85 +1,400 @@
+/* The gaps, and the figures below, give a little on short windows, so a
+   1366×768 laptop holds the title, the board, the year and the button in
+   one screen. */
+.wrap {
+  --gap: clamp(1.75rem, 6vh - 1.25rem, 2.75rem);
+  display: grid;
+  justify-items: start;
+  gap: var(--gap);
+}
+
+/* Cause over effect: each control stands over the number it moves, the hours
+   over the days they cost and the share over the days it gives back. On a
+   phone the controls stack and the two numbers sit side by side.
+   Side by side, the controls share their rows: where the hours label wraps
+   in a narrow column, the slider still sits level with the share control. */
+.board {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: clamp(1.25rem, 5vw, 5.5rem);
+  row-gap: 0.9rem;
+  width: 100%;
+}
+
 .control {
   display: grid;
-  gap: var(--space-3);
-  max-width: 36rem;
-  margin-top: var(--space-7);
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  gap: 0.9rem;
+  min-width: 0;
 }
 
-.control label {
-  font-family: var(--font-sign);
-  font-size: var(--step-1);
-  font-weight: 700;
+/* Where the label wraps, the reading sits on its last line, next to the
+   slider and level with the other label. */
+.head {
+  display: flex;
+  align-self: end;
+  align-items: last baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-weight: 600;
+  color: var(--fg-2);
 }
 
-.control input {
+.head > :first-child {
+  text-wrap: balance;
+}
+
+.value {
+  display: grid;
+  flex: none;
+  justify-items: end;
+  color: var(--fg);
+  font-weight: 650;
+}
+
+.value > * {
+  grid-area: 1 / 1;
+}
+
+.widest {
+  visibility: hidden;
+}
+
+/* A long track; the thumb is the dial seen from above. */
+.range {
+  --fill: 0.33;
+  appearance: none;
+  align-self: center;
   width: 100%;
   height: 2.75rem;
-  accent-color: var(--black);
+  margin: 0;
   background: transparent;
   cursor: pointer;
 }
 
-.control input:focus-visible {
-  outline: 3px solid var(--black);
-  outline-offset: 2px;
+.range::-webkit-slider-runnable-track {
+  height: 0.375rem;
+  border-radius: var(--r-pill);
+  background: linear-gradient(90deg, var(--dawn) calc(var(--fill) * 100%), var(--night-3) 0);
 }
 
-.answer {
-  margin-top: var(--space-6);
-  font-family: var(--font-sign);
-  font-size: var(--step-3);
-  font-weight: 600;
-  line-height: 1;
+.range::-moz-range-track {
+  height: 0.375rem;
+  border-radius: var(--r-pill);
+  background: linear-gradient(90deg, var(--dawn) calc(var(--fill) * 100%), var(--night-3) 0);
 }
 
-.answer strong {
-  display: block;
-  font-size: clamp(3.6rem, 1.5rem + 8vw, 9rem);
-  font-weight: 700;
-  line-height: 0.9;
-  letter-spacing: -0.02em;
+.range::-webkit-slider-thumb {
+  appearance: none;
+  width: 2.6rem;
+  height: 2.6rem;
+  margin-top: calc((0.375rem - 2.6rem) / 2);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 64% 30%, var(--ink) 0 0.18rem, transparent 0.2rem),
+    radial-gradient(circle, var(--dawn) 0 0.86rem, #6e6f75 0.88rem);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.18),
+    0 6px 14px rgb(0 0 0 / 0.5);
+  transition: transform 200ms var(--ease-out);
 }
 
-.days {
-  display: inline-block;
-  min-width: 2ch;
-  font-variant-numeric: tabular-nums;
+.range::-moz-range-thumb {
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 64% 30%, var(--ink) 0 0.18rem, transparent 0.2rem),
+    radial-gradient(circle, var(--dawn) 0 0.86rem, #6e6f75 0.88rem);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.18),
+    0 6px 14px rgb(0 0 0 / 0.5);
 }
 
-/* A year as a scale bar: a tick for every week, and the spent days filled in. */
-.scale {
+.range:active::-webkit-slider-thumb {
+  transform: scale(1.08) rotate(40deg);
+}
+
+.range:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 6px;
+  border-radius: var(--r-pill);
+}
+
+/* The share: a pill track with a thumb that slides to the choice. It isn't a
+   mode, so the thumb is the ground's ink, as the hero's is at Off. */
+.segments {
   position: relative;
-  height: 4.5rem;
-  margin-top: var(--space-7);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-self: center;
+  width: min(100%, 27rem);
+  padding: 0.3rem;
+  border-radius: var(--r-pill);
+  background: var(--tile);
+  box-shadow: inset 0 0 0 1px var(--line);
 }
 
-.ticks,
-.fill {
+.thumb {
   position: absolute;
-  inset: 0 0 1.6rem;
-  background: repeating-linear-gradient(90deg, var(--black) 0 1.5px, transparent 1.5px calc(100% / 52));
+  top: 0.3rem;
+  bottom: 0.3rem;
+  left: 0.3rem;
+  width: calc((100% - 0.6rem) / 3);
+  border-radius: var(--r-pill);
+  background: var(--fg);
+  transform: translateX(calc(var(--at) * 100%));
+  transition: transform 520ms var(--ease-out);
 }
 
-.ticks {
-  opacity: 0.35;
-  border-bottom: 2px solid var(--black);
+.segment {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  cursor: pointer;
 }
 
-.fill {
-  background: var(--black);
-  clip-path: inset(0 calc((1 - var(--filled)) * 100%) 0 0);
+.segment span {
+  display: grid;
+  place-items: center;
+  min-height: 2.5rem;
+  padding: 0 0.6rem;
+  border-radius: var(--r-pill);
+  color: var(--fg-2);
+  font-size: 0.95rem;
+  font-weight: 620;
+  font-variation-settings: "wdth" 104;
+  white-space: nowrap;
+  transition:
+    color 300ms var(--ease-out),
+    scale 200ms var(--ease-out);
 }
 
-.labels {
-  position: absolute;
-  inset: auto 0 0;
+@media (hover: hover) {
+  .segment:hover span {
+    color: var(--fg);
+  }
+}
+
+.segment input:checked + span {
+  color: var(--btn-fg);
+}
+
+.segment:active span {
+  scale: 0.97;
+}
+
+.segment input:focus-visible + span {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* The two answers. The days they cost recede in the soft ink; the days
+   Cairn gives back are the payoff, in the full one. */
+.stat {
+  display: grid;
+  align-content: start;
+  gap: 0.85rem;
+  min-width: 0;
+  margin-top: calc(clamp(2rem, 6.4vh - 1.1rem, 3.25rem) - 0.9rem);
+  color: var(--fg-2);
+}
+
+.back {
+  color: var(--fg);
+}
+
+/* Proportional figures: Mona Sans's tabular set slashes its zero, and a
+   left-aligned number can change width without moving anything. */
+.figure {
+  font-size: clamp(3.3rem, min(1rem + 7.4vw, 16vh - 1.5rem), 9rem);
+  font-weight: 800;
+  font-variation-settings: "wdth" 125;
+  line-height: 0.84;
+  letter-spacing: -0.035em;
+}
+
+.caption {
   display: flex;
-  justify-content: space-between;
-  font-family: var(--font-sign);
-  font-size: var(--step--1);
+  gap: 0.55em;
+  font-size: var(--t-lede);
   font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
 }
 
-.cta {
-  margin-top: var(--space-7);
+/* Each caption carries its dot from the year, so the numbers are the key:
+   a ring for every day on the apps, and a ring filled in for each one of
+   those Cairn gives back. */
+.key {
+  --size: 0.7em;
+  --ring: max(1.5px, 0.1em);
+  position: relative;
+  flex: none;
+  width: var(--size);
+  height: var(--size);
+  margin-top: calc((1lh - var(--size)) / 2);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 var(--ring) var(--dawn-2);
+}
+
+.back .key::after {
+  content: "";
+  position: absolute;
+  inset: calc(var(--ring) + 1px);
+  border-radius: inherit;
+  background: var(--dawn);
+}
+
+/* ——— The year: 53 columns of 7 days, sized from its own column so it fits
+   at every width. ——— */
+.frame {
+  width: 100%;
+  container-type: inline-size;
+}
+
+.year {
+  --ring: clamp(1.25px, 0.15cqi, 0.14rem);
+  display: grid;
+  grid-template-columns: repeat(53, minmax(0, 1fr));
+  grid-template-rows: repeat(7, auto);
+  grid-auto-flow: column;
+  gap: clamp(2px, 0.36cqi, 0.3125rem);
+}
+
+/* A given-back day's fill grows from the dot's centre. It is painted with
+   the dot rather than as a scaled layer of its own, so it stays centred in
+   its ring at any pixel density. */
+@property --year-fill {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+/* Weeks run Monday to Sunday and the year starts on a Thursday, so the first
+   and last weeks are both part-weeks, as on any calendar, and no lone day
+   hangs off the end. */
+.year span:first-child {
+  grid-row-start: 4;
+}
+
+/* Three states in the night's own inks, told apart by shape as well as tone:
+   the rest of the year is a dim dot, every day on the apps wears a ring, and
+   each one Cairn gives back is filled in inside its ring, so the rings count
+   the first figure and the fills the second. The mode colours stay the
+   dial's. */
+.year span {
+  --year-fill: 0;
+  --edge: calc(100% - var(--ring) - 1px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle closest-side,
+    var(--dawn) calc(var(--year-fill) * (var(--edge) - 0.7px)),
+    var(--night-3) calc(var(--year-fill) * var(--edge))
+  );
+  box-shadow: inset 0 0 0 0 var(--dawn-2);
+  transition:
+    box-shadow 320ms var(--ease-out),
+    --year-fill 420ms var(--ease-out);
+}
+
+/* The ring draws over the dim dot rather than replacing it, so a day never
+   passes through empty on its way between states. */
+.year span[data-day] {
+  box-shadow: inset 0 0 0 var(--ring) var(--dawn-2);
+}
+
+.year span[data-day="back"] {
+  --year-fill: 1;
+}
+
+/* A 44px tap on phones and on any touch screen. */
+@media (max-width: 700px), (pointer: coarse) {
+  .segment span {
+    min-height: 2.75rem;
+  }
+}
+
+/* Only a phone stacks the controls; from an iPad mini up, each one stands
+   over its number. */
+@media (max-width: 700px) {
+  .board {
+    row-gap: 1.75rem;
+  }
+
+  .control {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    grid-template-rows: none;
+  }
+
+  .segments {
+    width: 100%;
+  }
+
+  /* The answers stand as far from the questions as the year does from
+     them. */
+  .stat {
+    gap: 0.7rem;
+    margin-top: calc(var(--gap) - 1.75rem);
+  }
+}
+
+/* Below an iPad Air the hours label can't share a line with its longest
+   reading, so both labels take two balanced lines and the heads stay level,
+   line for line. */
+@media (min-width: 701px) and (max-width: 819px) {
+  .head > :first-child {
+    max-inline-size: 9em;
+    text-wrap: balance;
+  }
+}
+
+/* On a phone the year folds in two: 27 columns of a fortnight each, and
+   the captions step down to fit their half of the width. */
+@media (max-width: 640px) {
+  .caption {
+    font-size: var(--t-body);
+  }
+
+  .year {
+    grid-template-columns: repeat(27, minmax(0, 1fr));
+    grid-template-rows: repeat(14, auto);
+    gap: clamp(2.5px, 0.9cqi, 4px);
+  }
+}
+
+/* At 320px a hanging key would leave "days a" alone on a line: the key
+   sits in the first line instead, so each caption takes two. */
+@media (max-width: 359px) {
+  .caption {
+    display: block;
+  }
+
+  .key {
+    display: inline-block;
+    margin: 0 0.45em 0 0;
+    vertical-align: -0.04em;
+  }
+}
+
+/* A phone on its side can't hold the board in one screen whatever the
+   figures do, so they keep their size from the width and still outrank the
+   title. */
+@media (max-height: 500px) {
+  .figure {
+    font-size: clamp(3.3rem, 1rem + 7.4vw, 9rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thumb,
+  .segment span,
+  .year span {
+    transition: none;
+  }
 }

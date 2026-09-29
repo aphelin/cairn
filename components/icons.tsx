@@ -15,17 +15,6 @@ const base = (props: P) => ({
   ...props,
 });
 
-// The cairn mark: three stacked stones. Filled, like the engraving on the stone.
-export function CairnMark(props: P) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden focusable={false} {...props}>
-      <ellipse cx="12" cy="18" rx="8" ry="3.4" />
-      <ellipse cx="12.4" cy="11.7" rx="5.7" ry="2.8" />
-      <ellipse cx="11.7" cy="6.4" rx="3.5" ry="2.2" />
-    </svg>
-  );
-}
-
 export const Arrow = (p: P) => (
   <svg {...base(p)}>
     <path d="M4 12h15M13 6l6 6-6 6" />
@@ -74,6 +63,28 @@ export const Plus = (p: P) => (
 export const Minus = (p: P) => (
   <svg {...base(p)}>
     <path d="M5 12h14" />
+  </svg>
+);
+
+export const Menu = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M4 8.5h16M4 15.5h16" />
+  </svg>
+);
+
+// A person walking: the only way to undo a lock.
+export const Walk = (p: P) => (
+  <svg {...base(p)}>
+    <circle cx="13.5" cy="4.5" r="1.8" />
+    <path d="m9 21 2.5-6.5 3 3V21M8 12l3-4.5 3.5 1 2.5 3.5M11.5 7.5l-1 5 4 2" />
+  </svg>
+);
+
+// A phone meeting Pocket: the tap.
+export const Tap = (p: P) => (
+  <svg {...base(p)}>
+    <rect x="7" y="2.5" width="10" height="15" rx="2" />
+    <path d="M5 20.5c2 1 12 1 14 0M3.5 17.5c1 .8 2 1.3 3.5 1.6M20.5 17.5c-1 .8-2 1.3-3.5 1.6" />
   </svg>
 );
 

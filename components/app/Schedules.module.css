@@ -1,0 +1,204 @@
+/* Schedules: the week as seven 24-hour tracks, each schedule a block in the
+   colour of the mode it turns on. Switching one off folds its blocks away. */
+
+.week {
+  display: grid;
+  gap: 14px;
+  padding: 16px 16px 18px;
+  border-radius: var(--ios-r-group);
+  background: var(--ios-cell);
+}
+
+.weekHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.weekTitle {
+  font-size: 17px;
+  line-height: 22px;
+  font-weight: 680;
+  letter-spacing: -0.012em;
+}
+
+.now {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 560;
+  color: var(--ios-2);
+}
+
+.nowDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ios-label);
+}
+
+.grid {
+  display: grid;
+  gap: 7px;
+}
+
+.day {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  align-items: center;
+}
+
+.hours {
+  position: relative;
+  height: 14px;
+  margin-left: 34px;
+}
+
+.hours span {
+  position: absolute;
+  left: calc(var(--x) * 100%);
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 540;
+  color: var(--ios-2);
+  translate: -50% 0;
+}
+
+.hours span:first-child {
+  translate: 0 0;
+}
+
+.hours span:last-child {
+  translate: -100% 0;
+}
+
+.dayName {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 540;
+  color: var(--ios-2);
+}
+
+.day[data-today] .dayName {
+  color: var(--ios-label);
+  font-weight: 720;
+}
+
+.track {
+  position: relative;
+  height: 18px;
+  border-radius: var(--ios-r-xs);
+  background: var(--ios-fill);
+}
+
+.tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--x) * 100%);
+  width: 1px;
+  background: var(--ios-sep);
+}
+
+.block {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--a) * 100%);
+  width: calc(var(--w) * 100%);
+  border-radius: var(--ios-r-xs);
+  background: var(--block);
+  box-shadow: inset 0 0 0 1px var(--ios-block-edge);
+  transform-origin: left center;
+  transform: scaleX(0);
+  opacity: 0;
+  transition:
+    transform 560ms var(--ease-out) calc(var(--d) * 32ms),
+    opacity 300ms var(--ease-out) calc(var(--d) * 32ms);
+}
+
+/* The morning end of a night grows back from the morning, where it ends. */
+.block[data-from="end"] {
+  transform-origin: right center;
+}
+
+.block[data-on] {
+  transform: none;
+  opacity: 1;
+}
+
+.block[data-mode="desk"],
+.badge[data-mode="desk"] {
+  --block: var(--mode-desk);
+  --block-ink: var(--mode-desk-ink);
+}
+
+.block[data-mode="room"],
+.badge[data-mode="room"] {
+  --block: var(--mode-room);
+  --block-ink: var(--mode-room-ink);
+}
+
+.block[data-mode="home"],
+.badge[data-mode="home"] {
+  --block: var(--mode-home-deep);
+  --block-ink: var(--mode-home-ink);
+}
+
+/* Now: a line through today's track, with a dot above it. */
+.marker {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: calc(var(--x) * 100%);
+  z-index: 1;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: var(--r-pill);
+  background: var(--ios-label);
+  box-shadow: 0 0 0 1.5px var(--ios-cell);
+}
+
+.marker::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ios-label);
+  translate: -50% 0;
+}
+
+/* ——— The list ——— */
+.item {
+  --sep-inset: 58px;
+  align-items: center;
+}
+
+.badge {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--ios-r-icon);
+  background: var(--block);
+  color: var(--block-ink);
+  transition:
+    background-color 300ms var(--ease-out),
+    color 300ms var(--ease-out);
+}
+
+.badge:not([data-on]) {
+  background: var(--ios-fill-2);
+  color: var(--ios-2);
+}
+
+.badge svg {
+  width: 18px;
+  height: 18px;
+}

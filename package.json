@@ -2,7 +2,7 @@
   "name": "cairn",
   "version": "0.1.0",
   "private": true,
-  "description": "Cairn: launch site for a fictional stone that locks your distracting phone apps. A portfolio concept.",
+  "description": "Cairn: launch site for a fictional dial that locks your distracting phone apps. A portfolio concept.",
   "type": "module",
   "scripts": {
     "dev": "next dev",

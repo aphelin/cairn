@@ -1,14 +1,16 @@
+import { Fragment } from "react";
 import { COMPARE } from "@/lib/content";
 import { Check, Cross } from "@/components/icons";
 import styles from "./Compare.module.css";
 
-// Why a stone: against the settings you already have, and against willpower.
+// Against the settings you already have, and against willpower. Cairn's
+// column is set as a solid bar, so the answer reads before the rows do.
 export function Compare() {
   return (
-    <section id="compare" className="section" data-ground="chalk" aria-labelledby="compare-title">
+    <section id="compare" className="section" data-theme="mist" aria-labelledby="compare-title">
       <div className="inner">
-        <h2 id="compare-title" className="title">
-          Why a stone?
+        <h2 id="compare-title" className="title" data-reveal="">
+          Why not just set a limit?
         </h2>
         <div className={styles.wrap}>
           <table className={styles.table}>
@@ -18,7 +20,7 @@ export function Compare() {
                 <td />
                 {COMPARE.columns.map((c, i) => (
                   <th key={c} scope="col" data-us={i === 0 ? "" : undefined}>
-                    {c}
+                    <Words text={c} />
                   </th>
                 ))}
               </tr>
@@ -40,7 +42,7 @@ export function Compare() {
                           <span className="visually-hidden">No</span>
                         </>
                       ) : (
-                        v
+                        keepTime(v)
                       )}
                     </td>
                   ))}
@@ -52,4 +54,20 @@ export function Compare() {
       </div>
     </section>
   );
+}
+
+// A narrow head breaks between its words, never at a hyphen: "Built-in"
+// stays whole over "limits" instead of splitting as "Built- / in".
+function Words({ text }: { text: string }) {
+  return text.split(" ").map((word, i) => (
+    <Fragment key={i}>
+      {i > 0 && " "}
+      <span className={styles.word}>{word}</span>
+    </Fragment>
+  ));
+}
+
+// "1 a.m." is one reading: a narrow cell never leaves the hour behind.
+function keepTime(text: string) {
+  return text.replace(/(\d) (?=[ap]\.m\.)/g, "$1\u00a0");
 }

@@ -1,0 +1,221 @@
+/* Apps: a search capsule and two inset grouped lists, locked and allowed. */
+
+.apps {
+  display: grid;
+}
+
+/* ——— Search: iOS's capsule field, a fill on the grouped background ——— */
+.search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 38px;
+  border-radius: var(--r-pill);
+  background: var(--ios-fill);
+  transition: box-shadow 160ms var(--ease-out);
+}
+
+.search:focus-within {
+  box-shadow: inset 0 0 0 1.5px var(--ios-2);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 11px;
+  width: 17px;
+  height: 17px;
+  color: var(--ios-2);
+  pointer-events: none;
+}
+
+.field {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 40px 0 35px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  font-size: 17px;
+  letter-spacing: -0.012em;
+  caret-color: var(--tint-caret);
+  appearance: none;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.field::selection {
+  background: color-mix(in srgb, var(--tint-caret) 26%, transparent);
+}
+
+.field::placeholder {
+  color: var(--ios-2);
+  opacity: 1;
+}
+
+.field::-webkit-search-cancel-button,
+.field::-webkit-search-decoration {
+  appearance: none;
+}
+
+.field:focus-visible {
+  outline: none;
+}
+
+.clear {
+  position: absolute;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ios-3);
+}
+
+.clear svg {
+  width: 18px;
+  height: 18px;
+}
+
+.clear:focus-visible {
+  outline: 2px solid var(--ios-label);
+  outline-offset: -2px;
+  border-radius: 50%;
+}
+
+.count {
+  margin-left: 4px;
+  color: var(--ios-2);
+  font-weight: 600;
+}
+
+/* ——— Rows ——— */
+.app {
+  --sep-inset: 58px;
+  min-height: 58px;
+}
+
+.icon {
+  font-size: 30px;
+}
+
+.use {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.meter {
+  position: relative;
+  flex: none;
+  width: 34px;
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: var(--ios-fill-2);
+  overflow: hidden;
+}
+
+.meter span {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--ios-2);
+  transform-origin: left center;
+  transform: scaleX(var(--f));
+  transition: transform 600ms var(--ios-spring);
+}
+
+.meter[data-over] span {
+  background: var(--ios-label);
+}
+
+/* Under an app's own limit, a full-width bar in the tint. */
+.meter[data-wide] {
+  width: auto;
+  height: 6px;
+}
+
+.meter[data-wide] span {
+  background: var(--tint-fill);
+}
+
+.meter[data-wide][data-over] span {
+  background: var(--ios-label);
+}
+
+/* ——— Empty search ——— */
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 56px 24px 24px;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 8px;
+  color: var(--ios-3);
+}
+
+.emptyTitle {
+  font-size: 20px;
+  line-height: 25px;
+  font-weight: 700;
+  letter-spacing: -0.016em;
+  overflow-wrap: anywhere;
+}
+
+.emptyText {
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--ios-2);
+}
+
+/* ——— An app's own screen ——— */
+.art {
+  font-size: 64px;
+  box-shadow:
+    inset 0 0 0 0.5px rgb(11 11 12 / 0.08),
+    var(--ios-art-shadow);
+}
+
+.item,
+.mode {
+  --sep-inset: 58px;
+}
+
+.limit {
+  min-height: 56px;
+}
+
+.limitValue {
+  font-size: 17px;
+  line-height: 22px;
+  letter-spacing: -0.012em;
+}
+
+.usage {
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+  padding-bottom: 14px;
+}
+
+.usageHead {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ios-2);
+}
+
+.usageLeft {
+  color: var(--ios-label);
+  font-weight: 560;
+}

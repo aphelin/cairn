@@ -1,0 +1,122 @@
+.head {
+  display: grid;
+  gap: 1.25rem;
+  margin-bottom: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+/* Two phone-width tiles fit side by side from a small tablet up, so the pair
+   reads as a pair on every tablet and only phones stack them. */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 1.6vw, 1.5rem);
+}
+
+.tile {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  border-radius: var(--r-tile);
+  background: var(--tile);
+  overflow: hidden;
+}
+
+/* The stage grows with the page (rem, so a 27-inch screen gets the same
+   composition a quarter larger) and never takes more than most of a short
+   landscape window. The devices are sized against its height too, so neither
+   ever spills out of it onto the tile's words. */
+.stage {
+  --stage-h: min(clamp(18.75rem, 34vw, 28.75rem), 62svh);
+  display: grid;
+  place-items: center;
+  height: var(--stage-h);
+  background: radial-gradient(120% 80% at 50% 100%, var(--mist), var(--tile) 70%);
+}
+
+.anchor {
+  width: min(78%, 26.25rem, var(--stage-h));
+  aspect-ratio: 1 / 0.9;
+}
+
+/* Pocket is shown stuck to the tile's wall, face on, its shadow on the wall.
+   The still's shadow runs out to all four sides of its square, so until the
+   canvas takes over (or where it never does) the square is faded round the
+   disc instead of showing its edges on the wall. */
+.anchorPocket {
+  width: min(50%, 16.875rem, var(--stage-h) * 0.72);
+  aspect-ratio: 1 / 0.96;
+  mask-image: radial-gradient(closest-side, black 88%, transparent);
+}
+
+/* The name and text sit at the top; the facts and the price row sit at the
+   bottom, so side by side the two tiles' lists and buttons line up whatever
+   the length of their text. */
+.copy {
+  container-type: inline-size;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  gap: 0.6rem;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.kind {
+  font-weight: 620;
+  color: var(--fg);
+}
+
+.name {
+  font-size: clamp(1.8rem, 1.3rem + 1.5vw, 2.6rem);
+  letter-spacing: -0.028em;
+}
+
+.text {
+  max-width: 34ch;
+  color: var(--fg-2);
+  font-size: var(--t-lede);
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+
+.facts {
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.facts li {
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--line);
+  font-weight: 540;
+  font-variant-numeric: tabular-nums;
+}
+
+.buy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.4rem;
+}
+
+.price {
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-variation-settings: "wdth" 110;
+  letter-spacing: -0.02em;
+}
+
+/* Too narrow for the price and the button on one line (the smallest phones):
+   the button takes its own full-width line under the price. */
+@container (width < 17rem) {
+  .buy {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.9rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .tiles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,55 +1,87 @@
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+}
+
 .note {
-  margin-top: var(--space-4);
-  font-size: var(--step-0);
-  color: var(--ink-2);
+  color: var(--fg-2);
+  font-size: var(--t-small);
+  font-weight: 540;
 }
 
 .list {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: clamp(1.5rem, 4vw, 4rem);
-  margin-top: var(--space-8);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.4vw, 1.25rem);
+  margin: clamp(2.5rem, 5vw, 4rem) 0 0;
   padding: 0;
   list-style: none;
 }
 
-.list li:nth-child(2) {
-  margin-top: var(--space-8);
+/* Each card is its own container, so a quote is set for the width it
+   actually has: three across on an iPad Pro is a narrow card. */
+.card {
+  container-type: inline-size;
+  padding: clamp(1.5rem, 2.6vw, 2.25rem);
+  border-radius: var(--r-tile);
+  background: var(--tile);
+  transition: transform 500ms var(--ease-out);
 }
 
-.list li:nth-child(3) {
-  margin-top: var(--space-5);
+/* The lift is for a mouse only: on touch it would stick after a tap and
+   make a card that does nothing look like a button. */
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    transform: translateY(-4px);
+  }
 }
 
-.list blockquote {
-  margin: 0;
-  padding-top: var(--space-5);
-  border-top: 3px solid var(--yellow);
+.card figure {
+  display: grid;
+  gap: 2rem;
+  height: 100%;
+  align-content: space-between;
 }
 
-.list blockquote p {
-  font-family: var(--font-sign);
-  font-size: var(--step-2);
-  font-weight: 600;
-  line-height: 1.12;
+.card blockquote p {
+  font-size: min(clamp(1.3rem, 1.05rem + 0.8vw, 1.75rem), max(1.25rem, 8.5cqi));
+  font-weight: 620;
+  font-variation-settings: "wdth" 106;
+  line-height: 1.22;
+  letter-spacing: -0.018em;
+  text-wrap: balance;
 }
 
-.list figcaption {
-  margin-top: var(--space-4);
-  font-size: var(--step-0);
-  color: var(--ink-2);
+.card figcaption {
+  color: var(--fg-2);
+  font-size: var(--t-small);
 }
 
-.list figcaption strong {
-  color: var(--ink);
+.card figcaption strong {
+  color: var(--fg);
+  font-weight: 620;
+  margin-right: 0.3em;
 }
 
-@media (max-width: 900px) {
+/* Three across only once each card is wide enough to set its quote
+   at a reading size; below that the cards stack. Three across, a balanced
+   quote keeps the three shapes even; stacked, a card runs the full column
+   and balance would leave a dead band down its right side. */
+@media (max-width: 980px) {
   .list {
     grid-template-columns: 1fr;
   }
 
-  .list li:nth-child(n) {
-    margin-top: 0;
+  .card blockquote p {
+    text-wrap: pretty;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card:hover {
+    transform: none;
   }
 }

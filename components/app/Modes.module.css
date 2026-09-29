@@ -1,0 +1,330 @@
+/* Modes: the flat from above with each mode's reach, the four modes, and
+   each mode's own settings. A mode's screen takes that mode's colour. */
+
+.card {
+  display: grid;
+  gap: 14px;
+  padding: 12px 12px 16px;
+  border-radius: var(--ios-r-group);
+  background: var(--ios-cell);
+}
+
+/* ——— The plan ——— */
+.plan {
+  position: relative;
+  border-radius: var(--ios-r-plan);
+  background: var(--ios-plan-ground);
+  overflow: hidden;
+}
+
+.planSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.floor {
+  fill: var(--ios-plan-floor);
+  transition: fill 300ms var(--ease-out);
+}
+
+/* A room the mode covers, past its reach too: a faint wash. */
+.floor[data-in] {
+  fill: color-mix(in srgb, var(--zone) 12%, var(--ios-plan-floor));
+}
+
+/* Where the mode locks: its rooms, as far as it reaches, laid over the
+   floor and the furniture alike. */
+.zone {
+  fill: var(--zone);
+  fill-opacity: 0.4;
+}
+
+.desk {
+  fill: var(--ios-plan-furniture);
+}
+
+/* The phone lying on the desk, inside Desk's reach. */
+.phone {
+  fill: var(--night-3);
+  stroke: var(--ios-plan-floor);
+  stroke-width: 0.25;
+}
+
+/* Walls and panes keep their weight in points, whatever the zoom. */
+.wall {
+  fill: none;
+  stroke: var(--ios-label);
+  stroke-width: 4;
+  stroke-linecap: square;
+  vector-effect: non-scaling-stroke;
+}
+
+.pane {
+  fill: none;
+  stroke: var(--ios-plan-pane);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Each mode's reach in its own colour: dashed while that mode is off,
+   solid for the one that's on. The key under the plan draws the same. */
+.ring[data-mode="desk"],
+.legend li[data-mode="desk"] {
+  --ring: var(--mode-desk);
+}
+
+.ring[data-mode="room"],
+.legend li[data-mode="room"] {
+  --ring: var(--mode-room);
+}
+
+.ring[data-mode="home"],
+.legend li[data-mode="home"] {
+  --ring: var(--mode-home);
+}
+
+.ring {
+  fill: none;
+  stroke: var(--ring, var(--ios-plan-ring));
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+  vector-effect: non-scaling-stroke;
+  transition: stroke 300ms var(--ease-out);
+}
+
+.ring[data-on] {
+  stroke: var(--ring, var(--zone));
+  stroke-width: 2;
+  stroke-dasharray: none;
+}
+
+/* Half-metre marks round the dial in Desk's close-up: the scale its reach
+   is read against. */
+.mark {
+  fill: none;
+  stroke: var(--ios-plan-ring);
+  stroke-width: 1;
+  stroke-dasharray: 1 3;
+  vector-effect: non-scaling-stroke;
+}
+
+/* The close-up's walls fade out toward the frame's foot; the mask reads
+   only the fade's alpha, so it needs no colour. */
+.fade {
+  mask-type: alpha;
+}
+
+/* The reach follows the slider, easing between its steps. */
+.reachCircle {
+  transition: r 220ms var(--ease-out);
+}
+
+.dialBody {
+  fill: var(--night-3);
+  stroke: var(--ios-plan-ground);
+  stroke-width: 0.6;
+}
+
+.dialCap {
+  fill: var(--dawn);
+}
+
+.plan[data-lit] .dialCap {
+  fill: var(--zone);
+}
+
+.pocket {
+  fill: var(--night-3);
+}
+
+/* Room names in the overview, at each room's middle. */
+.roomName,
+.room {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  font-size: 12px;
+  line-height: 15px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--ios-2);
+  text-align: center;
+}
+
+.roomName[data-in] {
+  color: var(--ios-label);
+}
+
+/* The desk, named on its free end in Desk's close-up. */
+.deskName {
+  position: absolute;
+  font-size: 12px;
+  line-height: 15px;
+  font-weight: 600;
+  color: var(--ios-label);
+  translate: -50% -50%;
+}
+
+/* ——— Rooms that can be tapped in and out: the whole room is the button,
+   its name a pill that says whether it's in ——— */
+.room {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.room[aria-disabled="true"] {
+  cursor: default;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 26px;
+  padding: 0 10px 0 7px;
+  border-radius: var(--r-pill);
+  background: var(--ios-cell);
+  box-shadow: var(--ios-pill-shadow);
+  color: var(--ios-label);
+  white-space: nowrap;
+  transition:
+    background-color 240ms var(--ease-out),
+    color 240ms var(--ease-out),
+    scale 300ms var(--ios-spring);
+}
+
+.room[aria-pressed="true"] .pill {
+  background: var(--tint-fill);
+  color: var(--tint-fill-ink);
+}
+
+.room:active:not([aria-disabled="true"]) .pill {
+  scale: 0.92;
+  transition-duration: 80ms;
+}
+
+.pillIcon {
+  width: 13px;
+  height: 13px;
+}
+
+.room:focus-visible {
+  outline: none;
+}
+
+.room:focus-visible .pill {
+  outline: 2px solid var(--ios-label);
+  outline-offset: 2px;
+}
+
+/* ——— The overview's key ——— */
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ios-2);
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend li[data-on] {
+  color: var(--ios-label);
+  font-weight: 620;
+}
+
+.legend i {
+  width: 12px;
+  height: 12px;
+  border: 1.5px dashed var(--ring);
+  border-radius: 50%;
+}
+
+.legend li[data-on] i {
+  border: 2px solid var(--ring);
+  background: color-mix(in srgb, var(--ring) 30%, transparent);
+}
+
+/* ——— Reach ——— */
+.reach {
+  display: grid;
+  gap: 4px;
+  padding: 0 4px;
+}
+
+.reachHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 17px;
+  line-height: 22px;
+  letter-spacing: -0.012em;
+}
+
+.reachValue {
+  color: var(--ios-2);
+}
+
+/* ——— Lists ——— */
+.list {
+  margin-top: 16px;
+}
+
+.mode,
+.item {
+  --sep-inset: 58px;
+}
+
+.app {
+  --sep-inset: 58px;
+  min-height: 54px;
+}
+
+.appIcon {
+  font-size: 30px;
+}
+
+svg.glyph {
+  width: 30px;
+  height: 30px;
+}
+
+.count {
+  margin-left: 4px;
+  color: var(--ios-2);
+  font-weight: 600;
+}
+
+.always {
+  flex: none;
+  color: var(--ios-2);
+}
+
+/* The trailing "On" in a mode's bar: a status, not a button. */
+.now {
+  color: var(--ios-label);
+}
+
+.now i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tint-fill);
+  box-shadow: 0 0 6px var(--zone);
+}
+
+[data-tint] .now i {
+  background: var(--zone);
+}

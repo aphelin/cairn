@@ -1,221 +1,324 @@
+/* A jump here (every Pre-order link) puts the night ground at the top of the
+   window, not a strip of the section before it under the bar: html's
+   scroll-padding already clears the bar and 1rem, so this gives it back. */
+.root {
+  scroll-margin-top: calc(-1 * (var(--nav-h) + 1rem));
+}
+
 .grid {
+  --gap: clamp(2rem, 6vw, 7rem);
   display: grid;
-  grid-template-columns: 1fr minmax(20rem, 34rem);
-  gap: var(--space-7) clamp(2rem, 7vw, 8rem);
+  /* The form keeps its 30rem while there's room; on tablets it shares the
+     row evenly with the words and the dial. */
+  grid-template-columns: minmax(0, 1fr) min(30rem, (100% - var(--gap)) / 2);
+  gap: var(--gap);
   align-items: start;
 }
 
-.stone {
-  width: min(100%, 26rem);
-  margin-top: var(--space-7);
+/* The column runs the form's full height, and the dial settles in the
+   middle of whatever the words leave. */
+.side {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 1.25rem;
+  align-self: stretch;
+}
+
+/* The dial's zone spills onto the floor about one box-width either side of
+   its centre, and the canvas draws over the page, so the box stays small
+   enough that the spill fades out before the form starts (a violet cast on
+   the Reserve button otherwise). On a short window it also leaves the words
+   above it room to share the height under the bar.
+   The still that stands in before the canvas runs has that spill baked in,
+   and with nothing past the box to carry it on, it fades out at the box's
+   sides and floor, short of the device, instead of ending in a hard line. */
+.anchor {
+  --still-fade: 7%;
+  width: min(100%, 36rem, (100% + var(--gap)) / 1.5, max(18rem, (100svh - 20.5rem) / 0.9));
+  aspect-ratio: 1 / 0.9;
+  margin-top: clamp(1rem, 4vh, 3rem);
+  align-self: center;
+  mask-image: linear-gradient(var(--ink) 91%, transparent);
 }
 
 .form {
-  display: grid;
-  gap: var(--space-6);
-  padding: clamp(1.5rem, 3vw, 2.5rem);
-  background: var(--chalk);
-  box-shadow: 0 30px 60px -40px rgb(20 20 20 / 0.6);
+  container-type: inline-size;
 }
 
-.form fieldset {
-  margin: 0;
-  padding: 0;
-  border: 0;
+.form,
+.done {
+  display: grid;
+  gap: 1.5rem;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  border-radius: var(--r-tile);
+  background: var(--tile);
 }
 
 .models {
   display: grid;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--line);
 }
 
 .stepper {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  padding-block: var(--space-4);
-  border-bottom: 1.5px solid rgb(20 20 20 / 0.14);
-}
-
-.stepper:first-child {
-  padding-top: 0;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--line);
 }
 
 .stepLabel {
   display: grid;
+  line-height: 1.3;
 }
 
 .stepLabel strong {
-  font-family: var(--font-sign);
-  font-size: var(--step-1);
+  font-weight: 650;
 }
 
 .stepLabel span {
-  font-size: var(--step--1);
-  color: var(--ink-2);
+  color: var(--fg-2);
+  font-size: var(--t-small);
 }
 
 .buttons {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.75rem;
 }
 
 .buttons button {
   display: grid;
   place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border: 2px solid var(--black);
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
   border-radius: 50%;
-  background: transparent;
-  transition: background-color 160ms var(--ease-out);
+  background: var(--tile-2);
+  color: var(--fg);
+  transition:
+    transform 160ms var(--ease-out),
+    background-color 160ms var(--ease-out);
 }
 
 .buttons button:hover:not(:disabled) {
-  background: var(--yellow);
+  background: var(--line-strong);
+}
+
+.buttons button:active:not(:disabled) {
+  transform: scale(0.9);
 }
 
 .buttons button:disabled {
-  opacity: 0.3;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
-.buttons button:focus-visible {
-  outline: 3px solid var(--blue);
-  outline-offset: 2px;
-}
-
-.buttons svg {
-  width: 1.1rem;
-  height: 1.1rem;
+.buttons button svg {
+  width: 1.2rem;
+  height: 1.2rem;
 }
 
 .buttons output {
-  min-width: 1.6rem;
-  font-family: var(--font-sign);
-  font-size: var(--step-1);
-  font-weight: 700;
+  min-width: 1.4ch;
   text-align: center;
-  font-variant-numeric: tabular-nums;
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
-.colours legend {
-  margin-bottom: var(--space-3);
-  font-family: var(--font-sign);
-  font-size: var(--step-0);
-  font-weight: 600;
+.finishes {
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
-.colours > div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+/* A legend keeps a sliver of inline padding by default, and it stands
+   outside the fieldset's layout, so no gap reaches it: it takes the same
+   0.45rem over its pills as a field's label over its input. */
+.finishes legend {
+  padding: 0;
+  margin-bottom: 0.45rem;
 }
 
-.colour {
+/* Four even pills in a row where they fit, otherwise two by two, never
+   three and a stray. */
+.finishes > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+@container (min-width: 32rem) {
+  .finishes > div {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.finish {
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  min-height: 2.75rem;
-  padding: 0.3rem 0.8rem 0.3rem 0.5rem;
-  border: 2px solid rgb(20 20 20 / 0.2);
+  padding: 0.45rem 0.9rem 0.45rem 0.5rem;
+  border-radius: var(--r-pill);
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+  font-size: var(--t-small);
   font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: box-shadow 200ms var(--ease-out);
+}
+
+.finish input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  z-index: 1;
+  margin: 0;
   cursor: pointer;
 }
 
-.colour input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
+.finish:has(input:checked) {
+  box-shadow: inset 0 0 0 2px var(--fg);
 }
 
-.colour:has(input:checked) {
-  border-color: var(--black);
-  background: var(--yellow);
-}
-
-.colour:has(input:focus-visible) {
-  outline: 3px solid var(--blue);
-  outline-offset: 2px;
+.finish:has(input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
 }
 
 .chip {
-  width: 1.6rem;
-  height: 1.1rem;
-  border-radius: 48% 52% 46% 54% / 58% 55% 45% 42%;
-  box-shadow: inset 0 -2px 4px rgb(0 0 0 / 0.25);
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, #f3f1ec 0 0.42rem, var(--finish) 0.44rem);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.2);
 }
 
 .summary {
   display: grid;
-  gap: var(--space-1);
-  padding-top: var(--space-4);
-  border-top: 3px solid var(--black);
+  gap: 0.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
 }
 
 .total {
   display: flex;
-  justify-content: space-between;
   align-items: baseline;
-  font-family: var(--font-sign);
-  font-size: var(--step-1);
-  font-weight: 700;
+  justify-content: space-between;
+  font-weight: 600;
 }
 
 .total output {
-  font-size: var(--step-3);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
+  font-size: 2.4rem;
+  font-weight: 760;
+  font-variation-settings: "wdth" 112;
+  letter-spacing: -0.03em;
 }
 
 .saving {
-  justify-self: end;
-  font-size: var(--step--1);
-  font-weight: 600;
-  color: var(--green);
-}
-
-.form :global(.plate-wrap),
-.form :global(.plate) {
-  width: 100%;
-  justify-content: center;
+  color: var(--fg-2);
+  font-size: var(--t-small);
+  text-align: right;
 }
 
 .done {
-  display: grid;
-  gap: var(--space-3);
-  padding: clamp(1.5rem, 3vw, 2.5rem);
-  background: var(--black);
-  color: var(--chalk);
-  animation: arrive 600ms var(--ease-settle) both;
+  align-content: start;
 }
 
-.done svg {
-  width: 2.6rem;
-  height: 2.6rem;
-  padding: 0.4rem;
-  background: var(--yellow);
-  color: var(--black);
-  stroke-width: 2.5;
-}
-
-.doneTitle {
-  font-family: var(--font-sign);
-  font-size: var(--step-2);
-  font-weight: 700;
-}
-
-@keyframes arrive {
-  from {
-    transform: translateY(1rem);
-    opacity: 0;
+/* Beside the words and the dial, the confirmation settles level with the
+   dial rather than hanging from the top of an emptied column. */
+@media (min-width: 701px) {
+  .done {
+    align-self: center;
   }
 }
 
-@media (max-width: 900px) {
+/* On a short two-column window the tile draws in, and a jump brings the
+   title up to just under the bar (the section's own top padding scrolls
+   past too), so the whole order from the title to Reserve and its note is
+   on screen at once. */
+@media (min-width: 701px) and (max-height: 900px) {
+  .root {
+    scroll-margin-top: calc(1rem - var(--section));
+  }
+
+  .form,
+  .done {
+    gap: 1.1rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .stepper {
+    padding-block: 0.7rem;
+  }
+}
+
+.doneIcon {
+  width: 3rem;
+  height: 3rem;
+  padding: 0.6rem;
+  border-radius: 50%;
+  /* A reservation is not quiet: the mode colours stay for the dial's modes. */
+  background: var(--fg);
+  color: var(--bg);
+  stroke-width: 2.4;
+}
+
+.doneTitle {
+  font-size: var(--t-h3);
+  font-weight: 700;
+  font-variation-settings: "wdth" 110;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.done p:last-child {
+  color: var(--fg-2);
+  text-wrap: pretty;
+}
+
+/* On touch, the steppers and the finish pills reach past their drawn edge
+   to a 44px tap, without growing or reaching into their neighbours (the pills
+   meet halfway across their 0.5rem gap). */
+@media (pointer: coarse) {
+  .buttons button {
+    position: relative;
+  }
+
+  .buttons button::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+  }
+
+  .finish input {
+    inset: -4px -2px;
+  }
+}
+
+/* On the narrowest phones the steppers draw in so "Cairn Pocket" keeps to one line. */
+@container (max-width: 16rem) {
+  .stepper {
+    gap: 0.75rem;
+  }
+
+  .buttons {
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 700px) {
   .grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .anchor {
+    width: min(80vw, 22.5rem);
+    justify-self: center;
   }
 }

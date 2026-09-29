@@ -1,0 +1,11 @@
+/* The canvas every device is drawn on. It reaches a little past the window
+   above and below; the stage sets its height, and whether it's held to the
+   window or scrolls with the page (see `margin` in stage.ts). */
+.canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 5;
+  pointer-events: none;
+}

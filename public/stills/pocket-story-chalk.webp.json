@@ -1,0 +1,4 @@
+{
+  "prompt": "Origin: rendered from the site's own WebGL scene (components/pocket/scene.ts and inside.ts, with components/dial/geometry.ts, materials.ts and studio.ts: procedural geometry, turned-titanium materials and a baked studio, no generated imagery) as the still of the first frame of Pocket's story in Chalk, which holds the stage until the scene has drawn. Recipe, to render it again: 1440x900 at DPR 2 with WebGL; Chalk picked in #finishes (input value chalk); scrolled to the top of the story's track (progress 0) with the pointer centred; everything but the #pocket canvas hidden, background transparent; clipped to the square min(84% of the #pocket figure's height, 60% of its width) centred 63% across and halfway down it; WebP quality 86, alpha quality 90.",
+  "createdAt": "2026-09-26T20:04:38.659Z"
+}

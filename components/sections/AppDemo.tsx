@@ -1,131 +1,142 @@
 "use client";
 
-import { useState } from "react";
-import { APPS, SCHEDULES } from "@/lib/content";
-import { useStore } from "@/lib/store";
-import { useSpring } from "@/lib/useSpring";
-import { AppGlyph, Battery, Minus, Plus, Signal, TrendDown } from "@/components/icons";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { CairnApp, type Command } from "@/components/app/CairnApp";
+import type { Route } from "@/components/app/Stack";
+import { Arrow } from "@/components/icons";
+import { store } from "@/lib/store";
+import { TABS, type TabId } from "@/lib/appDemo";
 import styles from "./AppDemo.module.css";
 
-const LAST_WEEK = 120; // demo data: last week's average, in minutes
-const fmt = (m: number) => {
-  const h = Math.floor(m / 60);
-  const r = Math.round(m % 60);
-  return h ? `${h}h${r ? ` ${r}m` : ""}` : `${r}m`;
-};
+// Each note opens the part of the app it talks about: an app's own rules,
+// a mode's own settings (the one that's on, or Room), Today's safeguards.
+const NOTES: { tab: TabId; title: string; text: string; route?: () => Route; reveal?: boolean }[] = [
+  { tab: "apps", title: "Rules for each app", text: "The modes that lock it, and its own daily limit.", route: () => ({ kind: "app", id: "youtube" }) },
+  { tab: "modes", title: "Tune each mode", text: "How far it reaches, which rooms, what gets through.", route: () => ({ kind: "mode", level: store.get().level || 2 }) },
+  { tab: "today", title: "No easy way out", text: "It can’t be deleted while on. Three emergency unlocks a month.", reveal: true },
+];
 
-// The companion app, working. Placing a stone on an app locks it; the limit
-// and the counts move on springs and show their trend.
+const order = (tab: TabId) => TABS.findIndex((t) => t.id === tab);
+
+// The companion app, working, in a drawn iPhone. It shares the page's dial:
+// a mode picked here turns the dial, and the dial shows here.
 export function AppDemo() {
-  const [locked, setLocked] = useState<Set<string>>(() => new Set(APPS.filter((a) => a.locked).map((a) => a.id)));
-  const [limit, setLimit] = useState(90);
-  const [schedules, setSchedules] = useState(() => Object.fromEntries(SCHEDULES.map((s) => [s.id, s.on])));
-  const colour = useStore((s) => s.colour);
-  const count = useSpring(locked.size);
-  const shown = useSpring(limit);
-  const diff = limit - LAST_WEEK;
+  const stage = useRef<HTMLDivElement>(null);
+  const sheen = useRef<HTMLSpanElement>(null);
 
-  const toggle = (id: string) =>
-    setLocked((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
+  // The reflection on the cover glass slides as the page carries the phone
+  // past, the way light moves across a real one. Only while it's on screen.
+  useEffect(() => {
+    const el = sheen.current;
+    const box = stage.current;
+    if (!el || !box || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let raf = 0;
+    const place = () => {
+      raf = 0;
+      const r = box.getBoundingClientRect();
+      const p = (r.top + r.height / 2) / window.innerHeight - 0.5;
+      el.style.transform = `translate3d(0, ${(-p * 18).toFixed(2)}%, 0)`;
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(place);
+    };
+    const io = new IntersectionObserver(([e]) => {
+      if (e?.isIntersecting) {
+        window.addEventListener("scroll", onScroll, { passive: true });
+        onScroll();
+      } else window.removeEventListener("scroll", onScroll);
     });
+    io.observe(box);
+    return () => {
+      io.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  const [nav, setNav] = useState<{ tab: TabId; from: number; note: number; command: Command | null }>({ tab: "today", from: 0, note: -1, command: null });
+
+  // A tab picked in the app; a note marks itself only when it's the one
+  // that opened what's showing.
+  const onTab = useCallback(
+    (tab: TabId) => setNav((p) => ({ ...p, tab, from: Math.sign(order(tab) - order(p.tab)), note: -1 })),
+    [],
+  );
+
+  const open = (i: number) => {
+    const n = NOTES[i]!;
+    setNav((p) => ({
+      tab: n.tab,
+      from: Math.sign(order(n.tab) - order(p.tab)),
+      note: i,
+      command: { n: (p.command?.n ?? 0) + 1, tab: n.tab, route: n.route?.(), reveal: n.reveal },
+    }));
+  };
 
   return (
-    <section id="app" className="section" data-ground="chalk" aria-labelledby="app-title">
+    <section id="app" className="section" data-theme="mist" aria-labelledby="app-title">
       <div className={`inner ${styles.grid}`}>
         <div className={styles.head}>
-          <h2 id="app-title" className="title">
+          <h2 id="app-title" className="title" data-reveal="">
             Set the rules once.
           </h2>
-          <p className="lede">The app is free, and it needs no account.</p>
+          <p className="lede">The app is free, with no account and no subscription.</p>
         </div>
 
-        <ul className={styles.notes} aria-hidden="true">
-          <li className={styles.noteA}>Put a stone on an app to lock it</li>
-          <li className={styles.noteB}>Set a daily limit</li>
-          <li className={styles.noteC}>Choose quiet hours</li>
+        <ul className={styles.notes}>
+          {NOTES.map((n, i) => (
+            <li key={n.title}>
+              <button
+                type="button"
+                className={styles.note}
+                aria-controls={`cairn-panel-${n.tab}`}
+                aria-current={nav.note === i ? "true" : undefined}
+                onClick={() => {
+                  open(i);
+                  // Wherever the phone is partly out of view (stacked on a phone, the notes sit under
+                  // it), bring it in to show the change: whole where it fits the window, else the end
+                  // that changes: the top for a screen that opens, the foot for Today's safeguards.
+                  // The page's scroll padding keeps it off the nav.
+                  const el = stage.current;
+                  if (!el) return;
+                  const r = el.getBoundingClientRect();
+                  const pad = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+                  const nav = parseFloat(getComputedStyle(document.documentElement).fontSize) * 4;
+                  if (r.top >= nav && r.bottom <= window.innerHeight) return;
+                  el.scrollIntoView({
+                    block: r.height <= window.innerHeight - pad ? "center" : n.reveal ? "end" : "start",
+                    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+                  });
+                }}
+              >
+                <span className={styles.noteTitle}>
+                  {n.title}
+                  <Arrow className={styles.noteArrow} />
+                </span>
+                <span className={styles.noteText}>{n.text}</span>
+              </button>
+            </li>
+          ))}
         </ul>
 
-        <div className={styles.phone}>
-          <div className={styles.screen}>
-            <div className={styles.status} aria-hidden="true">
-              <span>9:41</span>
-              <span className={styles.statusIcons}>
-                <Signal />
-                <Battery />
+        <div ref={stage} className={styles.stage}>
+          <div className={styles.fit}>
+            <div className={styles.phone} role="group" aria-label="The Cairn app, working">
+              <span className={styles.buttons} aria-hidden="true">
+                <i data-b="action" />
+                <i data-b="up" />
+                <i data-b="down" />
+                <i data-b="side" />
+                <i data-b="camera" />
               </span>
-            </div>
-
-            <div className={styles.appHead}>
-              <h3>Locks</h3>
-              <span className={styles.inRange}>Home stone in range</span>
-            </div>
-
-            <p className={styles.count} aria-live="polite">
-              <strong>{Math.round(count)}</strong> of {APPS.length} apps locked
-            </p>
-            <ul className={styles.apps}>
-              {APPS.map((a) => {
-                const on = locked.has(a.id);
-                return (
-                  <li key={a.id}>
-                    <button type="button" className={styles.app} aria-pressed={on} onClick={() => toggle(a.id)}>
-                      <span className={styles.icon}>
-                        <AppGlyph name={a.glyph} />
-                      </span>
-                      <span className={styles.appName}>{a.name}</span>
-                      {on && (
-                        // eslint-disable-next-line @next/next/no-img-element -- static export; the still is pre-sized
-                        <img className={styles.pebble} src={`/stills/pocket-${colour}.webp`} alt="" width={800} height={560} decoding="async" />
-                      )}
-                      <span className="visually-hidden">{on ? ", locked" : ", not locked"}</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-
-            <div className={styles.limit}>
-              <span className={styles.rowLabel} id="limit-label">
-                Daily limit
-              </span>
-              <div className={styles.stepper} role="group" aria-labelledby="limit-label">
-                <button type="button" onClick={() => setLimit((l) => Math.max(15, l - 15))} disabled={limit <= 15} aria-label="Shorter limit">
-                  <Minus />
-                </button>
-                <output aria-live="polite">{fmt(shown)}</output>
-                <button type="button" onClick={() => setLimit((l) => Math.min(240, l + 15))} disabled={limit >= 240} aria-label="Longer limit">
-                  <Plus />
-                </button>
+              <div className={styles.glass}>
+                <div className={styles.screen}>
+                  <CairnApp tab={nav.tab} from={nav.from} onTab={onTab} command={nav.command} />
+                </div>
+                <span className={styles.island} aria-hidden="true" />
+                <span ref={sheen} className={styles.sheen} aria-hidden="true" />
               </div>
-              <p className={styles.trend} data-up={diff > 0 ? "" : undefined}>
-                <TrendDown />
-                {diff === 0 ? "Same as last week" : `${fmt(Math.abs(diff))} ${diff < 0 ? "less" : "more"} than last week`}
-              </p>
             </div>
-
-            <ul className={styles.schedules}>
-              {SCHEDULES.map((s) => (
-                <li key={s.id}>
-                  <span>
-                    <strong>{s.name}</strong>
-                    <span>{s.time}</span>
-                  </span>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={schedules[s.id]}
-                    aria-label={s.name}
-                    className={styles.switch}
-                    onClick={() => setSchedules((prev) => ({ ...prev, [s.id]: !prev[s.id] }))}
-                  />
-                </li>
-              ))}
-            </ul>
-            <p className={styles.unlocks}>3 emergency unlocks left this month</p>
           </div>
         </div>
       </div>

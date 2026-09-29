@@ -1,0 +1,610 @@
+/* Pocket, to try: the words on the left, and a patch of hallway wall on the
+   right with the front door at its edge, Pocket stuck beside it, and your
+   phone across the room. The disc is drawn by the page's device canvas; the
+   phone rides above it, and the ripple spreads on the wall beneath it. */
+
+.grid {
+  /* The widest wall whose height still fits between the nav and the foot of
+     the screen, so the phone, the disc and the button are all in view. */
+  --stage-max: calc((100svh - var(--nav-h) - 2rem) * 5 / 4);
+  display: grid;
+  /* The words are never narrower than the title on one line: where that
+     takes more than their share, the wall gives way. */
+  grid-template-columns: minmax(max-content, 0.8fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: clamp(2.5rem, 5vw, 5rem);
+}
+
+.copy {
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* The lede wraps to whatever the title leaves it, so it never widens the
+   column itself. */
+.lede {
+  contain: inline-size;
+}
+
+.controls {
+  display: grid;
+  justify-items: start;
+  gap: 1.1rem;
+  margin-top: 0.9rem;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 1.6em;
+  color: var(--fg-2);
+  font-weight: 540;
+}
+
+/* An empty ring while everything gets through; filled with the mode's
+   colour, and glowing, while the lock is on. */
+.dot {
+  flex: none;
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--fg-2);
+  transition:
+    background-color 300ms var(--ease-out),
+    box-shadow 300ms var(--ease-out);
+}
+
+.try[data-locked] .dot {
+  background: var(--mode, var(--accent));
+  box-shadow: 0 0 0.75rem color-mix(in srgb, var(--mode, var(--accent)) 50%, transparent);
+}
+
+/* ——— The wall ———
+   A still of the story's hallway (public/stills/pocket-wall*.webp, from
+   Pocket's own scene), with the tile's shape set to the still's, so the
+   places below land where the render put them: the disc's spot in the pool
+   of light, and the architrave's inner edge, where the plaster stops. */
+.stage {
+  --disc-x: 49.8%;
+  --disc-y: 35.9%;
+  /* The anchor's box: the disc is drawn at 78% of it, 13.4% of the wall. */
+  --disc: 17.2cqw;
+  --arch: 0.731;
+  --rest-x: 20%;
+  --rest-y: 53%;
+  --phone-w: 18.5cqw;
+  position: relative;
+  justify-self: end;
+  width: min(100%, var(--stage-max));
+  aspect-ratio: 5 / 4;
+  container-type: inline-size;
+  border-radius: var(--r-tile);
+  overflow: hidden;
+  background: var(--tile-2);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.wall {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The plaster, left of the door's frame. */
+.plaster {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 calc((1 - var(--arch)) * 100%) 0 0);
+  pointer-events: none;
+}
+
+/* Pocket, and the rings round it: a guide while the phone is carried, and
+   the tap's ripple. */
+.disc,
+.target,
+.ripple {
+  position: absolute;
+  left: var(--disc-x);
+  top: var(--disc-y);
+  translate: -50% -50%;
+}
+
+.disc {
+  width: var(--disc);
+}
+
+/* Its shadow on the plaster, cast down by the wall-washer above it (the
+   drawn disc covers the rest): it stands 14 mm off the wall. */
+.disc::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 76%;
+  aspect-ratio: 1;
+  translate: -52% -14%;
+  border-radius: 50%;
+  background: rgb(11 11 12 / 0.46);
+  filter: blur(calc(var(--disc) * 0.075));
+}
+
+.anchor {
+  width: 100%;
+  aspect-ratio: 1 / 0.96;
+}
+
+/* The still that stands in until the canvas draws the disc (or for good,
+   without WebGL): its baked shadow is still faintly there at the image's
+   edges, a darker square on the light plaster, so it fades out round the
+   disc instead, from just past its rim. */
+.stage .disc .anchor img {
+  mask-image: radial-gradient(closest-side, var(--ink) 86%, transparent);
+}
+
+.target {
+  width: calc(var(--disc) * 1.45);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1.5px dashed color-mix(in srgb, var(--paper) 80%, transparent);
+  opacity: 0;
+  scale: 0.92;
+  transition:
+    opacity 260ms var(--ease-out),
+    scale 260ms var(--ease-out),
+    border-color 200ms var(--ease-out);
+}
+
+.stage[data-dragging] .target {
+  opacity: 1;
+  scale: 1;
+}
+
+.stage[data-near] .target {
+  border-style: solid;
+  border-color: var(--paper);
+  box-shadow: 0 0 1.125rem color-mix(in srgb, var(--paper) 55%, transparent);
+  scale: 1.06;
+}
+
+.ripple {
+  width: calc(var(--disc) * 0.8);
+  aspect-ratio: 1;
+}
+
+/* Unlocking: a plain ring of light. Locking: the mode's colour. */
+.ripple span {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--paper) 85%, transparent);
+  box-shadow: 0 0 1rem color-mix(in srgb, var(--paper) 40%, transparent);
+  opacity: 0;
+}
+
+.try[data-locked] .ripple span {
+  border-color: var(--mode, var(--accent));
+  box-shadow:
+    0 0 1.375rem color-mix(in srgb, var(--mode, var(--accent)) 55%, transparent),
+    inset 0 0 0.75rem color-mix(in srgb, var(--mode, var(--accent)) 35%, transparent);
+}
+
+.ripple[data-on] span {
+  animation: ripple 1.3s var(--ease-out) forwards;
+}
+
+.ripple[data-on] span:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.ripple[data-on] span:nth-child(3) {
+  animation-delay: 0.32s;
+}
+
+@keyframes ripple {
+  0% {
+    opacity: 0.95;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3.6);
+  }
+}
+
+/* ——— The phone (depicted) ——— */
+.phone {
+  position: absolute;
+  left: var(--rest-x);
+  top: var(--rest-y);
+  z-index: 6;
+  width: var(--phone-w);
+  aspect-ratio: 71.6 / 147.6;
+  translate: calc(-50% + var(--dx, 0px)) calc(-50% + var(--dy, 0px));
+  rotate: -6deg;
+  /* The depicted phone's own metrics, in its width: a notification's corner. */
+  --note-r: 5.6cqw;
+  container-type: inline-size;
+  touch-action: pan-y;
+  cursor: grab;
+  transition:
+    translate var(--move, 0ms) var(--ease-out),
+    rotate 360ms var(--ease-out),
+    scale 360ms var(--ease-out);
+}
+
+.phone[data-pose="carry"] {
+  rotate: -2deg;
+  scale: 1.03;
+  cursor: grabbing;
+}
+
+.phone[data-pose="tap"] {
+  rotate: 0deg;
+  scale: 0.95;
+}
+
+.body {
+  width: 100%;
+  height: 100%;
+  padding: 3.6%;
+  border-radius: 16.2% / 7.9%;
+  background: var(--night);
+  box-shadow:
+    inset 0 0 0 1.5px var(--night-3),
+    inset 0 0 0 3px var(--night),
+    0 3rem 3.5rem -1.875rem rgb(11 11 12 / 0.5),
+    0 1rem 1.625rem -1rem rgb(11 11 12 / 0.36);
+  transition: box-shadow 360ms var(--ease-out);
+}
+
+.phone[data-pose="carry"] .body {
+  box-shadow:
+    inset 0 0 0 1.5px var(--night-3),
+    inset 0 0 0 3px var(--night),
+    0 4rem 4.5rem -2rem rgb(11 11 12 / 0.46),
+    0 1.25rem 2rem -1.125rem rgb(11 11 12 / 0.34);
+}
+
+/* Pressed to the disc, its shadow falls just below it, as the disc's does. */
+.phone[data-pose="tap"] .body {
+  box-shadow:
+    inset 0 0 0 1.5px var(--night-3),
+    inset 0 0 0 3px var(--night),
+    0 1.625rem 1.625rem -0.875rem rgb(11 11 12 / 0.5),
+    0 0.5rem 0.75rem -0.375rem rgb(11 11 12 / 0.34);
+}
+
+/* A phone buzzing in the hand: still most of the time, then a short rattle. */
+.try:not([data-locked]) .phone[data-pose="rest"] {
+  animation: buzz 3.4s linear 1.4s infinite;
+}
+
+@keyframes buzz {
+  0%,
+  86%,
+  100% {
+    transform: none;
+  }
+  87.5% {
+    transform: translateX(-0.125rem) rotate(-0.8deg);
+  }
+  89% {
+    transform: translateX(0.125rem) rotate(0.8deg);
+  }
+  90.5% {
+    transform: translateX(-0.094rem) rotate(-0.5deg);
+  }
+  92% {
+    transform: translateX(0.0625rem);
+  }
+}
+
+/* Until it's first tried, the phone leans toward the disc now and then. */
+.stage[data-fresh]:not([data-dragging]) .phone[data-pose="rest"] .body {
+  animation: nudge 4.6s var(--ease-in-out) 2.2s infinite;
+}
+
+@keyframes nudge {
+  0%,
+  72%,
+  100% {
+    transform: none;
+  }
+  80% {
+    transform: translate(9%, -3%) rotate(4deg);
+  }
+  88% {
+    transform: none;
+  }
+}
+
+.screen {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 13.4% / 6.5%;
+  background:
+    radial-gradient(90% 40% at 70% 6%, rgb(244 244 242 / 0.16), transparent 70%),
+    linear-gradient(180deg, var(--night-3), var(--night-2) 55%, var(--night));
+  color: var(--dawn);
+  font-variation-settings: "wdth" 100;
+  line-height: 1.2;
+}
+
+/* The lock dims the screen. */
+.screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--night);
+  opacity: 0;
+  transition: opacity 500ms var(--ease-out);
+  pointer-events: none;
+}
+
+.try[data-locked] .screen::after {
+  opacity: 0.5;
+}
+
+.island {
+  position: absolute;
+  left: 50%;
+  top: 3%;
+  width: 32%;
+  height: 4.4%;
+  translate: -50% 0;
+  border-radius: var(--r-pill);
+  background: var(--night);
+}
+
+.bar {
+  position: absolute;
+  left: 11%;
+  top: 3.9%;
+  font-size: 4.3cqw;
+  font-weight: 620;
+}
+
+.date,
+.time {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-weight: 600;
+}
+
+.date {
+  top: 11%;
+  font-size: 4.6cqw;
+  opacity: 0.8;
+}
+
+.time {
+  top: 13.4%;
+  font-size: 23cqw;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.date,
+.time,
+.bar,
+.island,
+.home {
+  z-index: 1;
+}
+
+.notes {
+  position: absolute;
+  inset: 29% 3.5% auto;
+  display: grid;
+  gap: 2.4cqw;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notes li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 3cqw;
+  padding: 3.2cqw;
+  border-radius: var(--note-r);
+  background: rgb(244 244 242 / 0.14);
+  transition:
+    opacity 420ms var(--ease-out),
+    transform 420ms var(--ease-out);
+  transition-delay: calc(var(--i) * 40ms);
+}
+
+.try[data-locked] .notes li {
+  opacity: 0;
+  transform: translateY(-12cqw) scale(0.96);
+}
+
+.noteIcon {
+  font-size: 10.5cqw;
+}
+
+.noteText {
+  display: grid;
+  min-width: 0;
+  font-size: 3.7cqw;
+}
+
+.noteText strong {
+  font-weight: 650;
+}
+
+.noteText span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  opacity: 0.86;
+}
+
+.quiet {
+  position: absolute;
+  inset: 34% 0 auto;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: 2cqw;
+  opacity: 0;
+  transform: translateY(4cqw);
+  transition:
+    opacity 480ms var(--ease-out) 120ms,
+    transform 480ms var(--ease-out) 120ms;
+}
+
+.try[data-locked] .quiet {
+  opacity: 1;
+  transform: none;
+}
+
+.row {
+  display: flex;
+  gap: 5cqw;
+  margin-bottom: 3cqw;
+}
+
+.lockedApp {
+  position: relative;
+}
+
+.lockedIcon {
+  font-size: 13cqw;
+  filter: grayscale(1);
+  opacity: 0.42;
+}
+
+/* The lock, in the mode's colour: the lock is on. */
+.badge {
+  position: absolute;
+  right: -2.2cqw;
+  top: -2.2cqw;
+  display: grid;
+  place-items: center;
+  width: 6.4cqw;
+  height: 6.4cqw;
+  border-radius: 50%;
+  background: var(--mode, var(--accent));
+  color: var(--mode-ink, var(--accent-ink));
+  box-shadow: 0 0 0 0.8cqw var(--night-2);
+}
+
+.badge svg {
+  width: 72%;
+  height: 72%;
+  stroke-width: 2.6;
+}
+
+.quietTitle {
+  font-size: 5.2cqw;
+  font-weight: 680;
+}
+
+.quietText {
+  font-size: 3.8cqw;
+  opacity: 0.6;
+}
+
+.home {
+  position: absolute;
+  left: 50%;
+  bottom: 1.6%;
+  width: 34%;
+  height: 0.7%;
+  translate: -50% 0;
+  border-radius: var(--r-pill);
+  background: rgb(244 244 242 / 0.6);
+}
+
+/* ——— Upright screens: the words, then the wall ———
+   Portrait tablets stack too, as Pocket's story does: beside the words the
+   wall would be a small tile in a tall screen. Any screen on its side, a
+   phone's included, keeps the two columns. */
+@media (max-aspect-ratio: 21/20) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stage {
+    justify-self: start;
+  }
+}
+
+/* A phone on its side: the words take what they need for the title on one
+   line and a little closer rhythm, and the wall has the rest, as tall as the
+   screen allows. */
+@media (max-height: 500px) and (min-aspect-ratio: 21/20) {
+  .grid {
+    grid-template-columns: minmax(max-content, 1fr) minmax(0, var(--stage-max));
+    column-gap: clamp(1.5rem, 5vw, 5rem);
+  }
+
+  .copy {
+    gap: 1rem;
+  }
+
+  .controls {
+    gap: 0.8rem;
+    margin-top: 0.4rem;
+  }
+}
+
+/* Upright phones get the upright still, and its places. The picture's
+   <source> in PocketTry.tsx carries the same query. */
+@media (max-width: 600px) and (max-aspect-ratio: 21/20) {
+  .stage {
+    --stage-max: calc((100svh - var(--nav-h) - 2rem) * 4 / 5);
+    --disc-x: 49.7%;
+    --disc-y: 33.9%;
+    --disc: 25.8cqw;
+    --arch: 0.847;
+    --rest-x: 19%;
+    --rest-y: 52%;
+    --phone-w: 27.5cqw;
+    aspect-ratio: 4 / 5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phone,
+  .body,
+  .notes li,
+  .quiet,
+  .target {
+    transition: none;
+  }
+
+  .try:not([data-locked]) .phone[data-pose="rest"],
+  .stage[data-fresh]:not([data-dragging]) .phone[data-pose="rest"] .body {
+    animation: none;
+  }
+
+  /* One ring that simply fades, in place of the spreading ripple. */
+  .ripple[data-on] span {
+    animation: none;
+  }
+
+  .ripple[data-on] span:first-child {
+    animation: settle 900ms linear forwards;
+    transform: scale(1.5);
+  }
+}
+
+@keyframes settle {
+  from {
+    opacity: 0.9;
+  }
+  to {
+    opacity: 0;
+  }
+}

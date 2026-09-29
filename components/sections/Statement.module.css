@@ -1,0 +1,43 @@
+.statement {
+  padding-block: clamp(7rem, 5rem + 10vw, 14rem);
+}
+
+/* The sentence hangs from the content column's edge, like every title on the
+   page: centring its 21ch box left the balanced lines short of the middle,
+   indented from the gutter by an amount that changed with the width. */
+.text {
+  max-width: 21ch;
+  font-size: clamp(2.2rem, 1rem + 4.2vw, 5rem);
+  font-weight: 720;
+  font-variation-settings: "wdth" 112;
+  line-height: 1.02;
+  letter-spacing: -0.026em;
+  text-wrap: balance;
+}
+
+/* Each word is its own box, so it can rise into place. */
+.word {
+  display: inline-block;
+}
+
+/* Lit by scroll: unread words wait dimmed (still at 3:1 against the night),
+   a touch low and soft, and come up to full strength and focus as you reach
+   them. The short transition smooths touch scrolling's coarser steps. */
+.text[data-lit] .word {
+  opacity: calc(0.38 + 0.62 * var(--lit, 0));
+  translate: 0 calc((1 - var(--lit, 0)) * 0.08em);
+  filter: blur(calc((1 - var(--lit, 0)) * 0.016em));
+  transition:
+    opacity 120ms linear,
+    translate 120ms linear,
+    filter 120ms linear;
+}
+
+.text[data-lit] .word[data-read] {
+  filter: none;
+}
+
+.answer {
+  display: block;
+  margin-top: 0.35em;
+}

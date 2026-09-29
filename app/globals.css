@@ -1,111 +1,110 @@
-/* Cairn: Waymark.
-   The page is a marked trail. Every section is one flat field in a trail
-   colour; blaze red means "you are here" and nothing else; signpost plates are
-   the nav, the buttons and the labels; contour lines are the only ornament. */
+/* Cairn. A modern launch page for a dial that turns your phone down.
+   Day sections are white and night sections are near-black, alternating like
+   a product film. Each of the dial's modes has its own colour (Desk, Room,
+   Home), and the page takes the current one: colour means "quiet is on".
+   Mona Sans carries everything; Doto, a dot-matrix face, is kept for the
+   device's own readouts. */
 
 :root {
-  --yellow: #f2c200;
-  --blue: #1f5aa6;
-  --green: #1d5b3b;
-  --chalk: #f4f1e8;
-  --chalk-deep: #e7e2d4;
-  --black: #141414;
-  --white: #ffffff;
-  --blaze: #d7262b;
+  --paper: #ffffff;
+  --mist: #f2f2f0;
+  --mist-2: #e6e6e3;
+  --ink: #0b0b0c;
+  --ink-2: #56565b;
+  --night: #070708;
+  --night-2: #121215;
+  --night-3: #1d1d21;
+  --dawn: #f4f4f2;
+  --dawn-2: #a3a3aa;
+  /* Each mode's colour (lib/modes.ts holds the same values for the 3D stage).
+     While the dial is on, the root carries --mode (its current colour, used as
+     var(--mode, var(--fg))); --accent is --mode, or Desk's while it is off. */
+  --mode-desk: #ffa53d;
+  --mode-desk-ink: #1c1000;
+  --mode-room: #ff4d6d;
+  --mode-room-ink: #23000a;
+  --mode-home: #7555ff;
+  --mode-home-ink: #ffffff;
+  --accent: var(--mode-desk);
+  --accent-ink: var(--mode-desk-ink);
+  --signal-red: #d9352b;
 
-  --font-sign: var(--font-barlow-condensed), "Arial Narrow", sans-serif;
-  --font-text: var(--font-barlow), system-ui, sans-serif;
+  --font-sans: var(--font-mona), "Helvetica Neue", Arial, sans-serif;
+  --font-dot: var(--font-doto), var(--font-mona), monospace;
 
-  /* Type scale (fluid, 390 → 1600) */
-  --step--1: clamp(0.84rem, 0.8rem + 0.15vw, 0.94rem);
-  --step-0: clamp(1.05rem, 1rem + 0.22vw, 1.2rem);
-  --step-1: clamp(1.25rem, 1.1rem + 0.55vw, 1.6rem);
-  --step-2: clamp(1.7rem, 1.35rem + 1.3vw, 2.6rem);
-  --step-3: clamp(2.4rem, 1.7rem + 2.8vw, 4.2rem);
+  /* Type scale, fluid from 390 to 1600 */
+  --t-display: clamp(3.1rem, 1rem + 6.4vw, 6rem);
+  --t-h2: clamp(2.35rem, 1.2rem + 3.9vw, 4.6rem);
+  --t-h3: clamp(1.35rem, 1.1rem + 0.9vw, 1.9rem);
+  --t-lede: clamp(1.14rem, 1.04rem + 0.42vw, 1.42rem);
+  --t-body: clamp(1rem, 0.96rem + 0.18vw, 1.12rem);
+  --t-small: clamp(0.86rem, 0.83rem + 0.12vw, 0.94rem);
 
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.5rem;
-  --space-6: 2rem;
-  --space-7: 3rem;
-  --space-8: 4.5rem;
-  --space-9: 7rem;
-
-  --gutter: clamp(1.25rem, 0.4rem + 3.4vw, 4.5rem);
+  --gutter: clamp(1.25rem, 0.5rem + 3vw, 3.5rem);
+  --section: clamp(6rem, 3.5rem + 7vw, 11rem);
+  --wide: 82.5rem; /* 1320px at the default size */
   --nav-h: 4rem;
-  --spine: 0.5rem;
+
+  --r-pill: 999px;
+  --r-tile: 1.75rem;
+  --r-card: 1.25rem;
+  --r-field: 0.875rem;
+  --r-focus: 0.5rem; /* a focus ring's corner on text that has no radius of its own */
+
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 
   color-scheme: light;
 }
 
-/* ——— Grounds: each section declares one, and its ink and plates follow ——— */
-[data-ground="yellow"] {
-  --bg: var(--yellow);
-  --ink: var(--black);
-  --ink-2: #3f3300;
-  --rule: rgb(20 20 20 / 0.28);
-  --contour: rgb(20 20 20 / 0.16);
-  --plate: var(--black);
-  --plate-ink: var(--yellow);
-  --plate-2: var(--black);
-  --focus: var(--black);
+/* ——— Themes: a section declares one; its ink, lines and tiles follow ——— */
+[data-theme="day"],
+:root {
+  --bg: var(--paper);
+  --fg: var(--ink);
+  --fg-2: var(--ink-2);
+  --line: rgb(11 11 12 / 0.1);
+  --line-strong: rgb(11 11 12 / 0.22);
+  --tile: var(--mist);
+  --tile-2: var(--mist-2);
+  --btn: var(--ink);
+  --btn-fg: var(--paper);
+  --field: var(--paper);
+  --focus: var(--ink);
 }
 
-[data-ground="chalk"] {
-  --bg: var(--chalk);
-  --ink: var(--black);
-  --ink-2: #4b4841;
-  --rule: rgb(20 20 20 / 0.2);
-  --contour: rgb(20 20 20 / 0.13);
-  --plate: var(--black);
-  --plate-ink: var(--yellow);
-  --plate-2: var(--black);
-  --focus: var(--blue);
+[data-theme="mist"] {
+  --bg: var(--mist);
+  --fg: var(--ink);
+  --fg-2: var(--ink-2);
+  --line: rgb(11 11 12 / 0.1);
+  --line-strong: rgb(11 11 12 / 0.22);
+  --tile: var(--paper);
+  --tile-2: #fafaf9;
+  --btn: var(--ink);
+  --btn-fg: var(--paper);
+  --field: var(--paper);
+  --focus: var(--ink);
 }
 
-[data-ground="blue"] {
-  --bg: var(--blue);
-  --ink: var(--white);
-  --ink-2: #d3e1f5;
-  --rule: rgb(255 255 255 / 0.3);
-  --contour: rgb(255 255 255 / 0.16);
-  --plate: var(--yellow);
-  --plate-ink: var(--black);
-  --plate-2: var(--white);
-  --focus: var(--yellow);
+[data-theme="night"] {
+  --bg: var(--night);
+  --fg: var(--dawn);
+  --fg-2: var(--dawn-2);
+  --line: rgb(244 244 242 / 0.12);
+  --line-strong: rgb(244 244 242 / 0.26);
+  --tile: var(--night-2);
+  --tile-2: var(--night-3);
+  --btn: var(--dawn);
+  --btn-fg: var(--ink);
+  --field: var(--night-2);
+  --focus: var(--dawn);
+  color-scheme: dark;
 }
 
-[data-ground="green"] {
-  --bg: var(--green);
-  --ink: var(--white);
-  --ink-2: #cfe5d6;
-  --rule: rgb(255 255 255 / 0.28);
-  --contour: rgb(255 255 255 / 0.14);
-  --plate: var(--yellow);
-  --plate-ink: var(--black);
-  --plate-2: var(--white);
-  --focus: var(--yellow);
-}
-
-[data-ground="black"] {
-  --bg: var(--black);
-  --ink: var(--chalk);
-  --ink-2: #bcb7aa;
-  --rule: rgb(244 241 232 / 0.22);
-  --contour: rgb(244 241 232 / 0.1);
-  --plate: var(--yellow);
-  --plate-ink: var(--black);
-  --plate-2: var(--chalk);
-  --focus: var(--yellow);
-}
-
-[data-ground] {
+[data-theme] {
   background: var(--bg);
-  color: var(--ink);
+  color: var(--fg);
 }
 
 *,
@@ -118,12 +117,19 @@
   margin: 0;
 }
 
+/* Past a 1920×1080 window the whole page grows with the screen, by whichever
+   side runs out first, so a 27-inch or ultrawide display sees the same
+   composition as a laptop, a quarter larger at 2560×1440 (and never beyond
+   22px). Everything sized in rem follows; below that the root is the
+   visitor's own size. */
 html {
+  font-size: clamp(100%, calc(4px + min(0.625vw, 1.1111vh)), 137.5%);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-padding-top: calc(var(--nav-h) + 1rem);
-  background: var(--yellow);
-  scrollbar-color: var(--black) var(--chalk-deep);
+  background: var(--paper);
+  scrollbar-color: rgb(11 11 12 / 0.35) transparent;
+  scrollbar-width: thin;
 }
 
 html.lenis,
@@ -137,26 +143,14 @@ html.lenis body {
 
 body {
   min-height: 100svh;
-  font-family: var(--font-text);
-  font-size: var(--step-0);
-  line-height: 1.5;
-  background: var(--chalk);
-  color: var(--black);
+  font-family: var(--font-sans);
+  font-size: var(--t-body);
+  line-height: 1.55;
+  font-variation-settings: "wdth" 100;
   -webkit-font-smoothing: antialiased;
-  font-variant-numeric: lining-nums;
-  caret-color: var(--blaze);
-}
-
-::selection {
-  background: var(--black);
-  color: var(--yellow);
-}
-
-[data-ground="black"] ::selection,
-[data-ground="blue"] ::selection,
-[data-ground="green"] ::selection {
-  background: var(--yellow);
-  color: var(--black);
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
 }
 
 img,
@@ -180,287 +174,289 @@ button {
 
 a {
   color: inherit;
-  text-decoration-thickness: 0.08em;
-  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+
+::selection {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+input,
+textarea {
+  caret-color: var(--fg);
 }
 
 :focus-visible {
-  outline: 3px solid var(--focus, var(--black));
+  outline: 2px solid var(--focus);
   outline-offset: 3px;
-}
-
-h1,
-h2,
-h3 {
-  font-family: var(--font-sign);
-  font-weight: 700;
-  line-height: 0.95;
-  letter-spacing: -0.01em;
-  text-wrap: balance;
-}
-
-p {
-  text-wrap: pretty;
+  border-radius: var(--r-focus);
 }
 
 .skip-link {
   position: fixed;
-  left: var(--space-4);
-  top: var(--space-4);
+  left: 1rem;
+  top: -4rem;
   z-index: 100;
-  padding: var(--space-2) var(--space-4);
-  background: var(--black);
-  color: var(--yellow);
-  font-family: var(--font-sign);
-  font-weight: 700;
-  transform: translateY(-200%);
+  padding: 0.7rem 1.1rem;
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 200ms var(--ease-out);
 }
 
 .skip-link:focus-visible {
-  transform: none;
+  top: 1rem;
 }
 
 .visually-hidden {
-  position: absolute;
+  position: absolute !important;
   width: 1px;
   height: 1px;
+  padding: 0;
+  margin: -1px;
   overflow: hidden;
-  clip-path: inset(50%);
+  clip: rect(0 0 0 0);
   white-space: nowrap;
+  border: 0;
 }
 
 /* ——— Layout ——— */
 .section {
   position: relative;
-  padding-block: clamp(5rem, 3rem + 6vw, 9rem);
-  padding-inline: var(--gutter);
-  overflow: clip;
+  padding: var(--section) var(--gutter);
 }
 
 .inner {
-  position: relative;
-  z-index: 2; /* above the stone canvas, so a travelling stone passes behind words */
-  max-width: 1320px;
+  width: 100%;
+  max-width: var(--wide);
   margin-inline: auto;
 }
 
-/* Survey linework on a ground, in that ground's own ink. The page's only ornament. */
-.contoured::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--contour);
-  mask: url("/contours.svg") center / cover no-repeat;
-  pointer-events: none;
+/* ——— Type ——— */
+.display,
+.title,
+.subtitle {
+  font-weight: 760;
+  font-variation-settings: "wdth" 116;
+  text-wrap: balance;
+}
+
+.display {
+  font-size: var(--t-display);
+  line-height: 0.94;
+  letter-spacing: -0.028em;
 }
 
 .title {
-  font-size: var(--step-3);
-  max-width: 14ch;
+  font-size: var(--t-h2);
+  line-height: 0.98;
+  letter-spacing: -0.026em;
+  max-width: 16ch;
+}
+
+.subtitle {
+  font-size: var(--t-h3);
+  font-weight: 680;
+  font-variation-settings: "wdth" 108;
+  line-height: 1.12;
+  letter-spacing: -0.018em;
 }
 
 .lede {
-  max-width: 34ch;
-  margin-top: var(--space-5);
-  font-size: var(--step-1);
-  line-height: 1.35;
-  color: var(--ink-2);
+  font-size: var(--t-lede);
+  line-height: 1.4;
+  letter-spacing: -0.006em;
+  color: var(--fg-2);
+  max-width: 36ch;
+  text-wrap: pretty;
 }
 
-.fine {
-  font-size: var(--step--1);
-  color: var(--ink-2);
+.small {
+  font-size: var(--t-small);
+  color: var(--fg-2);
 }
 
-/* ——— Signpost plates: the page's buttons and labels ———
-   A plate is a flat enamel sign; an arrow plate points where it takes you. */
-.plate {
-  --tip: 0.85em;
+.readout {
+  font-family: var(--font-dot);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ——— Buttons: pills. The primary is the ink of its ground. ——— */
+.btn {
+  --h: 3rem;
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.6em;
-  min-height: 3rem;
-  padding: 0.55em calc(var(--tip) + 0.9em) 0.55em 1.1em;
+  justify-content: center;
+  gap: 0.55em;
+  min-height: var(--h);
+  padding: 0 1.4rem;
   border: 0;
-  background: var(--plate);
-  color: var(--plate-ink);
-  font-family: var(--font-sign);
-  font-size: var(--step-0);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: 0.01em;
+  border-radius: var(--r-pill);
+  background: var(--btn);
+  color: var(--btn-fg);
+  font-size: 1rem;
+  font-weight: 620;
+  font-variation-settings: "wdth" 104;
+  letter-spacing: -0.005em;
   text-decoration: none;
   white-space: nowrap;
-  clip-path: polygon(0 0, calc(100% - var(--tip)) 0, 100% 50%, calc(100% - var(--tip)) 100%, 0 100%);
   transition:
     transform 260ms var(--ease-out),
-    background-color 200ms var(--ease-out);
+    translate 450ms var(--ease-out),
+    background-color 200ms var(--ease-out),
+    box-shadow 260ms var(--ease-out);
 }
 
-.plate:hover {
-  transform: translateX(0.3em);
+.btn svg {
+  width: 1.1em;
+  height: 1.1em;
+  transition: transform 260ms var(--ease-out);
 }
 
-.plate:active {
-  transform: translateX(0.15em) scale(0.98);
+.btn:hover svg {
+  transform: translateX(0.18em);
 }
 
-.plate:focus-visible {
-  outline: none;
-  box-shadow: none;
+.btn:active {
+  transform: scale(0.97);
 }
 
-/* Clip-path hides an outline, so the focus ring is a drop shadow on a wrapper. */
-.plate-wrap {
-  display: inline-block;
-  filter: drop-shadow(0 0 0 transparent);
-  transition: filter 160ms var(--ease-out);
-}
-
-.plate-wrap:has(.plate:focus-visible) {
-  filter: drop-shadow(3px 0 0 var(--focus)) drop-shadow(-3px 0 0 var(--focus)) drop-shadow(0 3px 0 var(--focus))
-    drop-shadow(0 -3px 0 var(--focus));
-}
-
-/* The square plate: no arrow, for actions that stay here. */
-.plate-square {
-  padding-right: 1.1em;
-  clip-path: none;
-  box-shadow: inset 0 0 0 2px var(--plate-2);
-  background: transparent;
-  color: var(--plate-2);
-}
-
-.plate-square:hover {
-  transform: none;
-  background: color-mix(in srgb, var(--plate-2) 12%, transparent);
-}
-
-.plate-square:focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 3px;
-}
-
-.plate[disabled],
-.plate[aria-disabled="true"] {
-  opacity: 0.45;
+.btn:disabled {
+  opacity: 0.4;
   cursor: not-allowed;
   transform: none;
 }
 
-.plate svg {
-  flex: none;
-  width: 1.1em;
-  height: 1.1em;
+.btn-ghost {
+  background: transparent;
+  color: var(--fg);
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
 }
 
-/* ——— The blaze: white, red, white, the trail's own stripe ——— */
-.blaze {
-  display: inline-grid;
-  grid-template-rows: 1fr 1fr 1fr;
-  width: 1.4rem;
-  height: 1.05rem;
-  flex: none;
+.btn-ghost:hover {
+  box-shadow: inset 0 0 0 1.5px var(--fg);
 }
 
-.blaze::before,
-.blaze::after {
-  content: "";
-  background: var(--white);
+.btn-lg {
+  --h: 3.5rem;
+  padding: 0 1.75rem;
+  font-size: 1.06rem;
 }
 
-.blaze > span {
-  background: var(--blaze);
-}
-
-.blaze::before {
-  order: -1;
-}
-
-/* ——— Forms ——— */
+/* ——— Fields ——— */
 .field {
   display: grid;
-  gap: var(--space-2);
+  gap: 0.45rem;
 }
 
-.field > label {
-  font-family: var(--font-sign);
-  font-size: var(--step-0);
+.field label,
+.label {
+  font-size: var(--t-small);
   font-weight: 600;
+  color: var(--fg);
 }
 
 .input {
   width: 100%;
   min-height: 3.25rem;
-  padding: 0.7rem 0.9rem;
-  border: 2px solid var(--ink);
-  border-radius: 0;
-  background: color-mix(in srgb, var(--bg) 70%, var(--white));
-  color: var(--black);
-  font-size: var(--step-0);
-  transition:
-    border-color 160ms var(--ease-out),
-    box-shadow 160ms var(--ease-out);
+  padding: 0.8rem 1rem;
+  border: 0;
+  border-radius: var(--r-field);
+  background: var(--field);
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+  color: var(--fg);
+  transition: box-shadow 180ms var(--ease-out);
 }
 
-[data-ground="blue"] .input,
-[data-ground="green"] .input,
-[data-ground="black"] .input {
-  border-color: var(--white);
-  background: var(--white);
+textarea.input {
+  resize: none;
+  min-height: 8rem;
 }
 
 .input::placeholder {
-  color: #4b4841;
+  color: var(--fg-2);
+  opacity: 1;
+}
+
+.input:hover {
+  box-shadow: inset 0 0 0 1.5px var(--fg-2);
 }
 
 .input:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px var(--focus);
+  box-shadow:
+    inset 0 0 0 2px var(--fg),
+    0 0 0 4px var(--line);
 }
 
 .input[aria-invalid="true"] {
-  border-color: var(--blaze);
-  box-shadow: 0 0 0 1px var(--blaze);
+  box-shadow: inset 0 0 0 2px var(--signal-red);
 }
 
-textarea.input {
-  min-height: 8rem;
-  resize: vertical;
+/* The error ring would otherwise replace the focus ring, and a failed send
+   puts focus on exactly this field. */
+.input[aria-invalid="true"]:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
 }
 
 .field-error {
   display: flex;
-  align-items: center;
-  gap: 0.5em;
-  font-size: var(--step--1);
-  font-weight: 600;
+  align-items: flex-start;
+  gap: 0.45rem;
+  font-size: var(--t-small);
+  font-weight: 560;
+  color: var(--fg);
 }
 
 .field-error::before {
   content: "";
-  width: 0.6em;
-  height: 0.6em;
   flex: none;
+  width: 0.55rem;
+  height: 0.55rem;
+  /* Level with the first line when the message wraps. */
+  margin-top: calc((1lh - 0.55rem) / 2);
   border-radius: 50%;
-  background: var(--blaze);
-  box-shadow: 0 0 0 2px var(--white);
+  background: var(--signal-red);
 }
 
 .demo-note {
-  font-size: var(--step--1);
-  color: var(--ink-2);
+  font-size: var(--t-small);
+  color: var(--fg-2);
 }
 
-/* ——— Motion preference ——— */
+/* ——— Heading reveal: lines rise out of a mask once, on arrival ——— */
+.reveal-line {
+  display: block;
+  overflow: clip;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+/* A section well out of view (Motion.tsx marks it idle) holds its looping
+   animations still: unseen, each frame of one is only work. Important,
+   because an animation shorthand anywhere else would set it running. */
+[data-idle] *,
+[data-idle] *::before,
+[data-idle] *::after {
+  animation-play-state: paused !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 1ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 1ms !important;
     scroll-behavior: auto !important;
   }
 }

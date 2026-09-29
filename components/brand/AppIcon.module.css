@@ -1,0 +1,18 @@
+/* The tile takes its size from the font size, so one icon fits a banner, a
+   list row or a home screen. Corners follow iOS's proportion of the tile. */
+.icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1em;
+  height: 1em;
+  border-radius: 22.5%;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 0.5px rgb(11 11 12 / 0.08);
+}
+
+.icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}

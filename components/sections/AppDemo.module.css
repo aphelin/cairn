@@ -1,405 +1,521 @@
+/* The app section: a title and three notes beside a drawn iPhone running the
+   Cairn app. Each note opens its part of the app. */
+
 .grid {
   display: grid;
-  grid-template-columns: 1fr minmax(18rem, 22rem) 1fr;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: 1fr auto auto 1fr;
   grid-template-areas:
-    "head phone a"
-    "b phone c";
-  column-gap: clamp(1.5rem, 4vw, 4rem);
-  row-gap: var(--space-7);
+    ". stage"
+    "head stage"
+    "notes stage"
+    ". stage";
+  column-gap: clamp(2rem, 7vw, 8rem);
 }
 
 .head {
   grid-area: head;
-  align-self: center;
+  display: grid;
+  gap: 1.25rem;
 }
 
+/* ——— Notes: each one a way into the app ——— */
+/* Wide enough that the longest note's line doesn't leave two words behind. */
 .notes {
-  display: contents;
+  grid-area: notes;
+  max-width: 34rem;
+  margin: 2.75rem 0 0;
+  padding: 0;
   list-style: none;
+  border-top: 1px solid var(--line);
 }
 
-/* The notes are signpost plates pointing at the part of the app they name. */
-.notes li {
-  --tip: 0.9rem;
-  align-self: center;
-  max-width: 17rem;
-  background: var(--yellow);
-  font-family: var(--font-sign);
-  font-size: var(--step-1);
-  font-weight: 700;
-  line-height: 1.1;
+.note {
+  position: relative;
+  display: grid;
+  gap: 0.2rem;
+  width: 100%;
+  padding: 1.05rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: var(--fg);
+  text-align: left;
 }
 
-/* Pointing left, at the phone on their left */
-.noteA,
-.noteC {
-  justify-self: start;
-  padding: 0.7rem 1rem 0.7rem calc(var(--tip) + 1rem);
-  clip-path: polygon(var(--tip) 0, 100% 0, 100% 100%, var(--tip) 100%, 0 50%);
+/* The open note is marked by a rule drawn across its top. */
+.note::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--fg);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 600ms var(--ease-out);
 }
 
-.noteA {
-  grid-area: a;
+.note[aria-current="true"]::before {
+  transform: scaleX(1);
 }
 
-.noteC {
-  grid-area: c;
+.noteTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 650;
 }
 
-/* Pointing right, at the phone on its right */
-.noteB {
-  grid-area: b;
-  justify-self: end;
-  padding: 0.7rem calc(var(--tip) + 1rem) 0.7rem 1rem;
-  clip-path: polygon(0 0, calc(100% - var(--tip)) 0, 100% 50%, calc(100% - var(--tip)) 100%, 0 100%);
+.noteArrow {
+  width: 1em;
+  height: 1em;
+  opacity: 0;
+  translate: -0.35em 0;
+  transition:
+    opacity 260ms var(--ease-out),
+    translate 360ms var(--ease-out);
 }
 
-/* ——— The phone ——— */
+.note:hover .noteArrow {
+  opacity: 0.55;
+  translate: 0 0;
+}
+
+.note[aria-current="true"] .noteArrow {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.noteText {
+  color: var(--fg-2);
+  text-wrap: pretty;
+}
+
+.note:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: var(--r-focus);
+}
+
+/* ——— The phone ———
+   A current iPhone Pro, drawn at its own points and scaled as a whole with a
+   transform, so the app inside keeps the platform's metrics: a 402 × 874 point
+   display with 62-point corners, a 9-point black border under the cover
+   glass, and a 5-point titanium rail round it, all three corners concentric.
+   The --ios-* values are iOS's system colours, the handset's materials and
+   its radii: depicted hardware and platform UI, not Cairn's tokens. */
+.stage {
+  grid-area: stage;
+  display: grid;
+  place-items: center;
+}
+
+/* The space the scaled handset takes in the layout. A transform rather than
+   zoom: every engine scales a transform alike, so the app's pointer maths
+   (on-screen rectangles against its own point sizes) holds in each, where
+   zoom's coordinates still differ from one browser to the next. */
+.fit {
+  /* The root size against its 16px default (tan(atan2()) makes a plain
+     ratio of two lengths): 1 up to a 1920×1080 window, 1.25 at 2560×1440,
+     so the handset grows with the notes beside it. */
+  --k: tan(atan2(1rem, 16px));
+  /* The handset's scale where the width allows it (stepped down for narrow
+     phones below), then kept whole in the window under the nav bar, down to
+     0.6: smaller than that the app's type stops being legible, so on a phone
+     turned sideways it runs past the window instead. */
+  --s-w: 0.84;
+  --s: min(calc(var(--s-w) * var(--k)), max(0.6, tan(atan2(100lvh - var(--nav-h) - 2.5rem, 902px))));
+  width: calc(430px * var(--s));
+  height: calc(902px * var(--s));
+}
+
 .phone {
-  grid-area: phone;
-  padding: 0.55rem;
-  border-radius: 2.6rem;
-  background: var(--black);
+  /* iOS system colours, light appearance. */
+  --ios-bg: #f2f2f7;
+  --ios-bg-clear: rgb(242 242 247 / 0);
+  --ios-bg-veil: rgb(242 242 247 / 0.72);
+  /* The scroll edge's wash of background, in steps down its ramp, and the
+     alpha steps of its masks. */
+  --ios-wash-84: rgb(242 242 247 / 0.84);
+  --ios-wash-66: rgb(242 242 247 / 0.66);
+  --ios-wash-50: rgb(242 242 247 / 0.5);
+  --ios-wash-28: rgb(242 242 247 / 0.28);
+  --ios-wash-10: rgb(242 242 247 / 0.1);
+  --ios-mask: #000;
+  --ios-mask-62: rgb(0 0 0 / 0.62);
+  --ios-mask-25: rgb(0 0 0 / 0.25);
+  --ios-cell: #ffffff;
+  --ios-label: #000;
+  --ios-label-hover: #2c2c2e;
+  --ios-2: #636366;
+  --ios-3: #aeaeb2;
+  --ios-sep: rgb(60 60 67 / 0.17);
+  --ios-sep-fine: rgb(60 60 67 / 0.29);
+  --ios-sep-strong: rgb(60 60 67 / 0.26);
+  --ios-fill: rgb(118 118 128 / 0.12);
+  --ios-fill-2: rgb(118 118 128 / 0.2);
+  --ios-fill-3: rgb(118 118 128 / 0.28);
+  --ios-hover: rgb(118 118 128 / 0.07);
+  --ios-off: #e5e5ea;
+  --ios-knob: #ffffff;
+  --ios-knob-shadow: 0 3px 8px rgb(0 0 0 / 0.15), 0 3px 1px rgb(0 0 0 / 0.06), 0 0 0 0.5px rgb(0 0 0 / 0.04);
+  --ios-thumb-shadow: 0 3px 8px rgb(0 0 0 / 0.12), 0 3px 1px rgb(0 0 0 / 0.04), 0 0 0 0.5px rgb(0 0 0 / 0.04);
+  --ios-green: #1c7a44;
+  --ios-red: #b23c17;
+  --ios-bar-last: #c7c7cc;
+  --ios-block-edge: rgb(0 0 0 / 0.06);
+  --ios-lift: 0 14px 28px -10px rgb(0 0 0 / 0.28);
+  --ios-lift-none: 0 0 0 0 rgb(0 0 0 / 0);
+  --ios-dark-line: rgb(244 244 242 / 0.14);
+  --ios-dark-fill: rgb(244 244 242 / 0.08);
+  --ios-knurl: rgb(255 255 255 / 0.16);
+  --ios-dial-edge: rgb(255 255 255 / 0.1);
+  --ios-indicator: rgb(0 0 0 / 0.36);
+  --ios-indicator-rim: rgb(255 255 255 / 0.5);
+  --ios-dark-fill-2: rgb(244 244 242 / 0.13);
+  --ios-dark-fill-3: rgb(244 244 242 / 0.18);
+  /* A row under a finger, and while the screen it opened is showing. */
+  --ios-press: rgb(118 118 128 / 0.16);
+  /* Pushing a screen: the shadow its leading edge casts, and the dimming of
+     the one it covers. */
+  --ios-push-shadow: -10px 0 28px -12px rgb(0 0 0 / 0.22);
+  --ios-push-shade: rgb(0 0 0 / 0.08);
+  /* The navigation bar's glass buttons. */
+  --ios-bar-button: rgb(255 255 255 / 0.82);
+  --ios-bar-button-lift: rgb(255 255 255 / 0.96);
+  --ios-bar-button-shadow: 0 4px 14px -4px rgb(0 0 0 / 0.14), 0 0 0 0.5px rgb(0 0 0 / 0.08), inset 0 1px 0.5px rgb(255 255 255 / 0.95);
+  /* The floor plan: the ground round the flat, its floors, the furniture,
+     the window panes and the dashed reach of the modes that aren't lit. */
+  --ios-plan-ground: #e9e9ee;
+  --ios-plan-floor: #fbfbfd;
+  --ios-plan-furniture: #dcdce2;
+  --ios-plan-pane: #9a9aa2;
+  --ios-plan-ring: rgb(60 60 67 / 0.36);
+  --ios-pill-shadow: 0 2px 6px -1px rgb(0 0 0 / 0.16), 0 0 0 0.5px rgb(0 0 0 / 0.06);
+  /* An app's icon, large, at the head of its own screen. */
+  --ios-art-shadow: 0 10px 24px -10px rgb(0 0 0 / 0.3);
+
+  /* Liquid Glass, the light variant: clear enough to show what scrolls under
+     it, with a bright rim where the edge of the glass catches the light. */
+  --ios-glass: rgb(255 255 255 / 0.5);
+  --ios-glass-rim: rgb(255 255 255 / 0.92);
+  --ios-glass-rim-dim: rgb(255 255 255 / 0.28);
+  --ios-glass-shadow: 0 10px 28px -8px rgb(0 0 0 / 0.16), 0 2px 6px rgb(0 0 0 / 0.05), 0 0 0 0.5px rgb(0 0 0 / 0.07),
+    inset 0 0 12px rgb(255 255 255 / 0.35);
+  --ios-lens: rgb(118 118 128 / 0.13);
+  --ios-lens-lift: rgb(255 255 255 / 0.64);
+  --ios-lens-shadow: 0 6px 16px -4px rgb(0 0 0 / 0.18), 0 0 0 0.5px rgb(0 0 0 / 0.06), inset 0 1px 0.5px rgb(255 255 255 / 0.95);
+
+  /* The handset: Black Titanium, from the specular glint on the corner
+     facing the light down to the shade on the far side; the buttons, which
+     stand proud of the rail and catch more light than it; the black border
+     under the glass, the island and its hidden camera. */
+  --ios-ti-spec: #b9bcc1;
+  --ios-ti-spec-far: #8e9196;
+  --ios-ti-sheen: #4f5257;
+  --ios-ti-lit: #46494e;
+  --ios-ti-top: #3d4044;
+  --ios-ti: #34373b;
+  --ios-ti-shade: #2a2c2f;
+  --ios-ti-deep: #1c1d1f;
+  --ios-ti-edge: rgb(255 255 255 / 0.2);
+  --ios-ti-glow: rgb(255 255 255 / 0.07);
+  --ios-ti-groove: rgb(0 0 0 / 0.42);
+  --ios-key-hi: #c4c7cc;
+  --ios-key: #71747a;
+  --ios-key-dim: #8a8d92;
+  --ios-button-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+  --ios-gasket: rgb(0 0 0 / 0.7);
+  --ios-lip: rgb(255 255 255 / 0.1);
+  --ios-glare: rgb(255 255 255 / 0.11);
+  --ios-glare-soft: rgb(255 255 255 / 0.035);
+  --ios-bezel: #000;
+  --ios-island: #000;
+  --ios-camera: #16213a;
+  --ios-camera-glint: rgb(140 160 220 / 0.55);
+  --ios-sapphire: #101012;
+  --ios-phone-shadow: 0 1px 1px rgb(11 11 12 / 0.16), 0 8px 14px -6px rgb(11 11 12 / 0.2), 0 34px 60px -26px rgb(11 11 12 / 0.46),
+    0 80px 120px -64px rgb(11 11 12 / 0.5);
+
+  /* Radii: the handset's concentric corners, then iOS 26's controls. */
+  --ios-r-body: 76px;
+  --ios-r-glass: 71px;
+  --ios-r-screen: 62px;
+  --ios-r-group: 26px;
+  /* Inside a card: Today's settings row, and the Modes floor plan. */
+  --ios-r-card-row: 18px;
+  --ios-r-plan: 16px;
+  --ios-r-icon: 7px;
+  --ios-r-xs: 4px;
+  --ios-r-s: 10px;
+  --ios-r-key: 3px;
+  --ios-r-button: 2px;
+
+  /* A spring (damping ratio 0.72) sampled into linear(): a small, quick settle. */
+  --ios-spring: linear(0, 0.049, 0.165, 0.312, 0.464, 0.606, 0.729, 0.828, 0.905, 0.961, 0.998, 1.021, 1.034, 1.038, 1.038, 1.034, 1.028, 1.022, 1.017, 1.012, 1.008, 1.005, 1.002, 1, 0.999, 1);
+  /* A looser one (damping ratio 0.55) for the tab bar's glass lens. */
+  --ios-spring-loose: linear(0, 0.063, 0.212, 0.398, 0.585, 0.749, 0.878, 0.968, 1.022, 1.047, 1.051, 1.043, 1.028, 1.012, 1, 0.992, 0.989, 0.989, 0.991, 0.994, 0.997, 1, 1.001, 1.001, 1);
+  /* A firm one (damping ratio 0.86) for the lens coming to rest in an end
+     tab, where the loose spring's swing would carry it out of the bar. */
+  --ios-spring-firm: linear(0, 0.047, 0.156, 0.289, 0.425, 0.551, 0.659, 0.75, 0.821, 0.877, 0.919, 0.949, 0.97, 0.985, 0.994, 1, 1.003, 1.005, 1.005, 1.005, 1.004, 1.004, 1.003, 1.002, 1);
+
+  position: relative;
+  width: 430px;
+  height: 902px;
+  padding: 5px;
+  border-radius: var(--ios-r-body);
+  /* The rail, lit from the upper left. Seen from the centre of a 430 × 902
+     body, its corners sit about 25° either side of straight up and down,
+     and each corner's curve spans only some 13° of the turn: a narrow glint
+     where the top-left curve faces the light and a dimmer one on the far
+     bottom-right curve, the side facing the light a little brighter than
+     the side turned away. Round the outside, the chamfer catches a hairline
+     of light; the glass's own shadow darkens the inner edge. */
+  background: conic-gradient(
+    var(--ios-ti-top) 0deg 10deg,
+    var(--ios-ti-sheen) 23deg,
+    var(--ios-ti-shade) 42deg 138deg,
+    var(--ios-ti-spec-far) 156deg,
+    var(--ios-ti-shade) 170deg,
+    var(--ios-ti-deep) 180deg,
+    var(--ios-ti-shade) 190deg,
+    var(--ios-ti-sheen) 204deg,
+    var(--ios-ti-lit) 222deg 316deg,
+    var(--ios-ti-spec) 335deg,
+    var(--ios-ti-top) 350deg
+  );
   box-shadow:
-    0 0 0 1.5px #3a3a3a inset,
-    0 40px 60px -30px rgb(20 20 20 / 0.5);
+    inset 0 0 0 0.5px var(--ios-ti-edge),
+    inset 0 0 2px 1.5px var(--ios-ti-glow),
+    var(--ios-phone-shadow);
+  isolation: isolate;
+  transform: scale(var(--s));
+  transform-origin: 0 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ——— The buttons on the rail: Action and volume on the left; the side
+   button and the flush Camera Control on the right ——— */
+.buttons {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.buttons i {
+  position: absolute;
+  width: 3.5px;
+  background: linear-gradient(90deg, var(--ios-ti-shade), var(--ios-key-hi) 42%, var(--ios-key) 72%, var(--ios-ti-shade));
+  box-shadow: var(--ios-button-shadow);
+}
+
+.buttons i[data-b="action"],
+.buttons i[data-b="up"],
+.buttons i[data-b="down"] {
+  left: -3px;
+  border-radius: var(--ios-r-button) 0 0 var(--ios-r-button);
+}
+
+.buttons i[data-b="side"],
+.buttons i[data-b="camera"] {
+  right: -3px;
+  border-radius: 0 var(--ios-r-button) var(--ios-r-button) 0;
+  /* The right-hand buttons face away from the light. */
+  background: linear-gradient(270deg, var(--ios-ti-deep), var(--ios-key-dim) 45%, var(--ios-ti-sheen) 72%, var(--ios-ti-deep));
+}
+
+.buttons i[data-b="action"] {
+  top: 168px;
+  height: 36px;
+}
+
+.buttons i[data-b="up"] {
+  top: 236px;
+  height: 62px;
+}
+
+.buttons i[data-b="down"] {
+  top: 312px;
+  height: 62px;
+}
+
+.buttons i[data-b="side"] {
+  top: 258px;
+  height: 100px;
+}
+
+/* Camera Control sits almost flush: sapphire in a thin metal ring. */
+.buttons i[data-b="camera"] {
+  top: 566px;
+  right: -1.5px;
+  width: 2px;
+  height: 76px;
+  background: var(--ios-sapphire);
+  box-shadow: 0 0 0 0.75px var(--ios-key-dim);
+}
+
+/* The cover glass and the black border under it. Away from the window the
+   browser skips drawing the app under it altogether: its glass, blurs and
+   layers otherwise cost every frame of scrolling anywhere on the page. The
+   glass is already clipped and sized by the handset, never by its content,
+   so skipping it moves nothing. */
+.glass {
+  position: relative;
+  height: 100%;
+  padding: 9px;
+  border-radius: var(--ios-r-glass);
+  background: var(--ios-bezel);
+  box-shadow:
+    0 0 0 0.75px var(--ios-gasket),
+    0 0 0 1.5px var(--ios-lip),
+    0 0 1.5px 2px var(--ios-ti-groove);
+  overflow: hidden;
+  isolation: isolate;
+  content-visibility: auto;
+  contain-intrinsic-size: 420px 892px;
 }
 
 .screen {
-  padding: 0.9rem 1rem 1.2rem;
-  border-radius: 2.1rem;
-  background: var(--chalk);
-  color: var(--black);
-  font-size: 0.92rem;
-}
-
-.status {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 0.4rem;
-  font-weight: 600;
-  font-size: 0.82rem;
-}
-
-.statusIcons {
-  display: flex;
-  gap: 0.3rem;
-}
-
-.statusIcons svg {
-  width: 1.05rem;
-  height: 1.05rem;
-}
-
-.appHead {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-top: 0.9rem;
-}
-
-.appHead h3 {
-  font-size: 2rem;
-}
-
-.inRange {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.15rem 0.5rem;
-  background: var(--black);
-  color: var(--yellow);
-  font-family: var(--font-sign);
-  font-size: 0.82rem;
-  font-weight: 700;
-}
-
-.count {
-  margin-top: 0.5rem;
-  color: var(--ink-2);
-}
-
-.count strong {
-  display: inline-block;
-  min-width: 1ch;
-  color: var(--black);
-  font-family: var(--font-sign);
-  font-size: 1.2rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.apps {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-  margin-top: 0.7rem;
-  padding: 0;
-  list-style: none;
-}
-
-.app {
   position: relative;
-  display: grid;
-  justify-items: center;
-  gap: 0.3rem;
-  width: 100%;
-  padding: 0.6rem 0.2rem 0.5rem;
-  border: 0;
-  border-radius: 0.9rem;
-  background: var(--white);
-  box-shadow: inset 0 0 0 1.5px rgb(20 20 20 / 0.12);
-  transition:
-    background-color 200ms var(--ease-out),
-    transform 200ms var(--ease-out);
+  height: 100%;
+  border-radius: var(--ios-r-screen);
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--ios-bg);
 }
 
-.app:hover {
-  transform: translateY(-2px);
-}
-
-.app:active {
-  transform: scale(0.97);
-}
-
-.app:focus-visible {
-  outline: 3px solid var(--blue);
-  outline-offset: 2px;
-}
-
-.icon {
-  display: grid;
-  place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.7rem;
-  background: var(--chalk-deep);
-}
-
-.icon svg {
-  width: 1.4rem;
-  height: 1.4rem;
-}
-
-.app[aria-pressed="true"] {
-  background: #e3ded0;
-}
-
-.app[aria-pressed="true"] .icon {
-  opacity: 0.45;
-}
-
-.appName {
-  font-size: 0.78rem;
-  font-weight: 600;
-  line-height: 1.1;
-}
-
-/* The stone lands on the tile: the same render as the stone on the page. */
-.pebble {
+/* The Dynamic Island, 11 points under the top of the display. The camera
+   behind it shows faintly, the way it does in a bright room. */
+.island {
   position: absolute;
-  top: 0.35rem;
+  top: 20px;
   left: 50%;
-  width: 3.4rem;
-  height: auto;
+  z-index: 8;
+  width: 126px;
+  height: 37px;
+  border-radius: var(--r-pill);
+  background: var(--ios-island);
   translate: -50% 0;
   pointer-events: none;
-  animation: land 520ms var(--ease-settle) both;
 }
 
-@keyframes land {
-  from {
-    transform: translateY(-1.6rem) scale(1.25);
-    opacity: 0;
-  }
-  60% {
-    opacity: 1;
-  }
-  to {
-    transform: none;
-  }
-}
-
-.limit {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 0.3rem 0.5rem;
-  margin-top: 1rem;
-  padding-top: 0.9rem;
-  border-top: 1.5px solid rgb(20 20 20 / 0.12);
-}
-
-.rowLabel {
-  font-weight: 600;
-}
-
-.stepper {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.stepper button {
-  display: grid;
-  place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border: 0;
-  border-radius: 50%;
-  background: var(--black);
-  color: var(--yellow);
-}
-
-.stepper button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.stepper button:focus-visible {
-  outline: 3px solid var(--blue);
-  outline-offset: 2px;
-}
-
-.stepper svg {
-  width: 1.1rem;
-  height: 1.1rem;
-}
-
-.stepper output {
-  min-width: 4.6rem;
-  font-family: var(--font-sign);
-  font-size: 1.3rem;
-  font-weight: 700;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-
-.trend {
-  grid-column: 1 / -1;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--green);
-}
-
-.trend svg {
-  width: 1rem;
-  height: 1rem;
-}
-
-.trend[data-up] {
-  color: #3f3300;
-}
-
-.trend[data-up] svg {
-  transform: scaleY(-1);
-}
-
-.schedules {
-  display: grid;
-  gap: 0.5rem;
-  margin-top: 0.9rem;
-  padding: 0.9rem 0 0;
-  border-top: 1.5px solid rgb(20 20 20 / 0.12);
-  list-style: none;
-}
-
-.schedules li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.schedules li > span {
-  display: grid;
-  line-height: 1.2;
-}
-
-.schedules li > span span {
-  font-size: 0.8rem;
-  color: var(--ink-2);
-}
-
-.switch {
-  position: relative;
-  width: 3.1rem;
-  height: 1.8rem;
-  flex: none;
-  border: 0;
-  border-radius: 1rem;
-  background: #cfc9ba;
-  transition: background-color 200ms var(--ease-out);
-}
-
-.switch::after {
+.island::after {
   content: "";
   position: absolute;
-  top: 0.2rem;
-  left: 0.2rem;
-  width: 1.4rem;
-  height: 1.4rem;
+  top: 12.5px;
+  right: 13px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: var(--white);
-  box-shadow: 0 1px 3px rgb(20 20 20 / 0.3);
-  transition: transform 260ms var(--ease-settle);
+  background: radial-gradient(circle at 34% 32%, var(--ios-camera-glint), var(--ios-camera) 34%, var(--ios-island) 72%);
+  opacity: 0.8;
 }
 
-.switch[aria-checked="true"] {
-  background: var(--black);
+/* Light on the cover glass: a window's reflection across the display and
+   the border, crisp on its leading edge and falling off behind it, with a
+   fainter second pane further down. It drifts as the page scrolls the
+   phone past. Too faint to matter over the light screens, it shows over
+   the dark card, as a reflection does. */
+.sheen {
+  position: absolute;
+  inset: -30% -10%;
+  z-index: 9;
+  background: linear-gradient(
+    116deg,
+    transparent 37%,
+    var(--ios-glare) 37.6%,
+    var(--ios-glare-soft) 44%,
+    transparent 50%,
+    transparent 71%,
+    var(--ios-glare-soft) 71.6%,
+    transparent 76%
+  );
+  pointer-events: none;
+  will-change: transform;
 }
 
-.switch[aria-checked="true"]::after {
-  transform: translateX(1.3rem);
-  background: var(--yellow);
-}
-
-.switch:focus-visible {
-  outline: 3px solid var(--blue);
-  outline-offset: 2px;
-}
-
-.unlocks {
-  margin-top: 0.9rem;
-  font-size: 0.8rem;
-  color: var(--ink-2);
-  text-align: center;
+/* Reduced motion: every change lands at once. No duration at all, not even
+   a token one: with one, each element's inherited visibility would step in
+   a frame behind its parent's, and a screen coming back into view would
+   take a moment to accept focus. */
+@media (prefers-reduced-motion: reduce) {
+  .phone *,
+  .phone *::before,
+  .phone *::after,
+  .note::before,
+  .noteArrow {
+    animation: none !important;
+    transition-duration: 0s !important;
+  }
 }
 
 @media (max-width: 900px) {
   .grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
     grid-template-areas:
       "head"
-      "a"
-      "b"
-      "c"
-      "phone";
-    row-gap: var(--space-2);
+      "stage"
+      "notes";
+    row-gap: 3rem;
   }
 
-  .head {
-    margin-bottom: var(--space-5);
+  .notes {
+    max-width: none;
+    margin-top: 0;
+  }
+}
+
+/* A phone turned sideways: stacked, the handset would run two windows tall
+   between the title and the notes. Beside them it takes one column's worth
+   of scroll, the notes still in reach of it. */
+@media (min-width: 640px) and (max-width: 900px) and (max-height: 500px) and (orientation: landscape) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: 1fr auto auto 1fr;
+    grid-template-areas:
+      ". stage"
+      "head stage"
+      "notes stage"
+      ". stage";
+    row-gap: 0;
   }
 
-  .noteA,
-  .noteB,
-  .noteC {
-    justify-self: start;
-    padding: 0.4rem 0.7rem;
-    font-size: var(--step-0);
-    clip-path: none;
+  .notes {
+    margin-top: 2.75rem;
   }
+}
 
-  .noteC {
-    margin-bottom: var(--space-6);
+/* Each step keeps the handset, buttons included (436 points), inside the
+   gutters at the narrowest window it covers. */
+@media (max-width: 460px) {
+  .fit {
+    --s-w: 0.8;
   }
+}
 
-  .phone {
-    width: min(100%, 22rem);
-    justify-self: center;
+@media (max-width: 388px) {
+  .fit {
+    --s-w: 0.76;
+  }
+}
+
+@media (max-width: 369px) {
+  .fit {
+    --s-w: 0.72;
+  }
+}
+
+@media (max-width: 350px) {
+  .fit {
+    --s-w: 0.66;
+  }
+}
+
+@media (max-width: 322px) {
+  .fit {
+    --s-w: 0.6;
   }
 }

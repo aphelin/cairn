@@ -63,5 +63,5 @@ export function serve(port = 0) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const port = Number(process.argv[2] ?? 3000);
   const server = await serve(port);
-  console.log(`Nightbloom static export on http://localhost:${server.address().port}`);
+  console.log(`Cairn static export on http://localhost:${server.address().port}`);
 }

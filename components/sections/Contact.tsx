@@ -9,10 +9,10 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 // Launch news and a way to write in. Both are demos: they validate and confirm, and send nothing.
 export function Contact() {
   return (
-    <section id="contact" className="section" data-ground="blue" aria-labelledby="contact-title">
+    <section id="contact" className="section" data-theme="mist" aria-labelledby="contact-title">
       <div className={`inner ${styles.grid}`}>
-        <div>
-          <h2 id="contact-title" className="title">
+        <div className={styles.side}>
+          <h2 id="contact-title" className="title" data-reveal="">
             Write to us.
           </h2>
           <Newsletter />
@@ -51,7 +51,7 @@ function Newsletter() {
         setDone(true);
       }}
     >
-      <h3>Launch news</h3>
+      <h3 className="subtitle">Launch news</h3>
       <p className={styles.small}>Two emails a year, at most.</p>
       <div className="field">
         <label htmlFor={id} className="visually-hidden">
@@ -70,11 +70,9 @@ function Newsletter() {
             aria-invalid={error ? "true" : undefined}
             aria-describedby={error ? `${id}-error` : undefined}
           />
-          <span className="plate-wrap">
-            <button type="submit" className="plate">
-              Sign up
-            </button>
-          </span>
+          <button type="submit" className="btn">
+            Sign up
+          </button>
         </div>
         {error && (
           <p id={`${id}-error`} className="field-error">
@@ -153,17 +151,17 @@ function ContactForm() {
 
   return (
     <form ref={form} className={styles.contact} onSubmit={submit} noValidate aria-labelledby={`${id}-title`}>
-      <h3 id={`${id}-title`}>Send a note</h3>
+      <h3 id={`${id}-title`} className="subtitle">
+        Send a note
+      </h3>
       <div className={styles.row}>
         {field("name", "Name", { autoComplete: "name" })}
         {field("email", "Email", { type: "email", autoComplete: "email", inputMode: "email" })}
       </div>
       {field("message", "Message")}
-      <span className="plate-wrap">
-        <button type="submit" className="plate">
-          Send note <Arrow />
-        </button>
-      </span>
+      <button type="submit" className={`btn ${styles.send}`}>
+        Send note <Arrow />
+      </button>
       <p className="demo-note">A demo: nothing is sent.</p>
     </form>
   );

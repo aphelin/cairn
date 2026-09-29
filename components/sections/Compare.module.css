@@ -1,72 +1,194 @@
 .wrap {
-  margin-top: var(--space-7);
+  position: relative;
+  margin-top: clamp(2.5rem, 5vw, 4rem);
   overflow-x: auto;
 }
 
+/* The row names take a share and the three answers split the rest evenly,
+   so Cairn's bar is exactly as wide as what it's set against. Type and
+   cells grow with the screen from a phone's size at 560px to the page's
+   body size at 744px, so there's no step where the table jumps. */
 .table {
   width: 100%;
-  min-width: 34rem;
-  border-collapse: collapse;
-  font-size: var(--step-1);
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: clamp(0.86rem, 0.3rem + 1.6vw, 1em);
+  font-variant-numeric: tabular-nums;
+}
+
+.table thead td {
+  width: 38%;
+}
+
+.table thead th {
+  width: 20.66%;
 }
 
 .table th,
 .table td {
-  padding: var(--space-4) var(--space-4);
-  text-align: left;
-  vertical-align: middle;
+  padding: clamp(0.85rem, 2.61vw - 0.06rem, 1.15rem) clamp(0.35rem, 1vw, 1.25rem);
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+  text-wrap: balance;
 }
 
-.table thead th {
-  font-family: var(--font-sign);
-  font-size: var(--step-1);
-  font-weight: 700;
+.word {
+  white-space: nowrap;
 }
 
 .table tbody th {
-  font-weight: 500;
-  max-width: 18rem;
+  text-align: left;
+  padding-left: 0;
+  padding-right: clamp(0.6rem, 2vw - 0.1rem, 1.5rem);
+  font-weight: 560;
 }
 
-.table tbody tr {
-  border-top: 1.5px solid var(--rule);
+.table thead th {
+  font-weight: 650;
+  color: var(--fg-2);
+  font-size: clamp(0.78rem, 0.46rem + 0.92vw, var(--t-small));
 }
 
-/* Cairn's column is a yellow sign plate running down the table. */
+/* Cairn's column: one solid ink bar from head to foot. */
 .table [data-us] {
-  background: var(--yellow);
-  font-family: var(--font-sign);
-  font-weight: 700;
+  background: var(--ink);
+  color: var(--paper);
+  border-bottom-color: rgb(255 255 255 / 0.12);
+  font-weight: 650;
 }
 
 .table thead [data-us] {
-  font-size: var(--step-2);
+  color: var(--paper);
+  font-size: clamp(0.86rem, 0.43rem + 1.22vw, 1rem);
+  border-radius: var(--r-card) var(--r-card) 0 0;
 }
 
-.yes,
+.table tbody tr:last-child [data-us] {
+  border-radius: 0 0 var(--r-card) var(--r-card);
+  border-bottom-color: transparent;
+}
+
+.table svg {
+  width: clamp(1.15rem, 0.39rem + 2.17vw, 1.4rem);
+  height: clamp(1.15rem, 0.39rem + 2.17vw, 1.4rem);
+  margin-inline: auto;
+}
+
+.yes {
+  stroke-width: 2.25;
+}
+
 .no {
-  width: 1.7rem;
-  height: 1.7rem;
-  stroke-width: 2.4;
+  color: var(--fg-2);
+  opacity: 0.75;
 }
 
-.no {
-  opacity: 0.45;
-}
-
-@media (max-width: 560px) {
+/* Once the longest row name fits on one line with room to spare, the name
+   column stops growing and the answers take the rest: on a wide screen the
+   bar sits close to the rows it answers instead of across an empty band.
+   18em is 38% of the column at 870px, so the hand-over is seamless. */
+@media (min-width: 870px) {
   .table {
-    min-width: 0;
-    font-size: var(--step-0);
+    table-layout: fixed;
+  }
+
+  .table thead td {
+    width: 18em;
+  }
+
+  .table thead th {
+    width: auto;
+  }
+}
+
+/* A phone's table is sized by what each column must hold. The price stays
+   on one line once there's room for it, and the bar is never the
+   narrowest column. */
+@media (min-width: 390px) {
+  .table td[data-us] {
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 440px) and (max-width: 499px) {
+  .table thead td {
+    width: 34%;
+  }
+
+  .table thead th {
+    width: 22%;
+  }
+}
+
+/* Willpower's column holds the longest answers, so on the narrowest
+   phones it takes the extra. */
+@media (max-width: 439px) {
+  .table thead td {
+    width: 37%;
+  }
+
+  .table thead th[data-us] {
+    width: 22%;
+  }
+
+  .table thead th:nth-child(3) {
+    width: 17%;
+  }
+
+  .table thead th:nth-child(4) {
+    width: 24%;
+  }
+}
+
+@media (max-width: 389px) {
+  .table thead td {
+    width: 40%;
+  }
+
+  .table thead th[data-us],
+  .table thead th:nth-child(3) {
+    width: 17.5%;
+  }
+
+  .table thead th:nth-child(4) {
+    width: 25%;
+  }
+}
+
+/* The narrowest phones take one more step down, so every row name still
+   fits on two lines. */
+@media (max-width: 359px) {
+  .table {
+    font-size: 0.8rem;
+  }
+
+  .table thead td {
+    width: 42%;
+  }
+
+  .table thead th[data-us],
+  .table thead th:nth-child(3) {
+    width: 17%;
+  }
+
+  .table thead th:nth-child(4) {
+    width: 24%;
   }
 
   .table th,
   .table td {
-    padding: var(--space-3) var(--space-2);
+    padding: 0.8rem 0.2rem;
   }
 
-  .table thead th,
+  .table tbody th {
+    padding-right: 0.4rem;
+  }
+
+  .table thead th {
+    font-size: 0.72rem;
+  }
+
   .table thead [data-us] {
-    font-size: var(--step-0);
+    font-size: 0.8rem;
   }
 }

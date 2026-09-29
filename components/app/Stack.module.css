@@ -1,0 +1,68 @@
+/* A tab's navigation stack: its screens stacked in the display, the top one
+   showing. The display's own corners (AppDemo's screen) clip them, so a
+   screen sliding in keeps square edges, as it does on a real phone. */
+
+.stack {
+  position: absolute;
+  inset: 0;
+  /* Its own layer of the app, under the tab bar, the scroll edge and the
+     status bar, however its screens stack inside. */
+  z-index: 0;
+  isolation: isolate;
+}
+
+/* Another tab's stack stays laid out but isn't drawn, so switching back to
+   it costs no restyle or layout; like `hidden`, it's out of sight, out of
+   the accessibility tree and out of reach of the pointer. */
+.stack[hidden] {
+  display: block;
+  content-visibility: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Each screen is its own stacking context, so screens stack in the order
+   they were pushed, whatever they hold. Without it a screen under the top
+   one could lift its navigation bar (z-index 3) over a screen that the
+   slide's lingering translate had made a context of its own. */
+.page {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--ios-bg);
+}
+
+/* Screens under the top one are out of sight until a slide or a swipe
+   brings them back. */
+.page:not([data-ios-top]):not([data-leaving]) {
+  visibility: hidden;
+}
+
+/* A pushed screen casts a soft shadow on the one it slides over. */
+.page:not([data-page="0"]) {
+  box-shadow: var(--ios-push-shadow);
+}
+
+/* The dimming on a screen something has been pushed over. Hidden outright
+   between slides, so a screen at rest doesn't carry a full-size layer. */
+.shade {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  background: var(--ios-push-shade);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* The strip along the left edge that a swipe back starts from, under the
+   navigation bar so the back button stays clear. */
+.grip {
+  position: absolute;
+  top: 106px;
+  bottom: 96px;
+  left: 0;
+  z-index: 7;
+  width: 16px;
+  touch-action: pan-y;
+}

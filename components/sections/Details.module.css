@@ -1,0 +1,249 @@
+/* Three columns on wide screens: the box stands down the left as one list,
+   the facts sit two rows high beside it, so the list and the facts come out
+   about the same height and no tile holds a hole. A fact's column is a third
+   of the width, so its sentence keeps to two or three lines even at 981px. */
+.bento {
+  --gap: clamp(0.75rem, 1.4vw, 1.25rem);
+  --pad: clamp(1.4rem, 2.4vw, 2rem);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas:
+    "box phones phones"
+    "box app unlocks"
+    "material material material";
+  gap: var(--gap);
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+
+.tile {
+  display: grid;
+  align-content: space-between;
+  gap: 1.5rem;
+  min-height: 14rem;
+  padding: var(--pad);
+  border-radius: var(--r-tile);
+  background: var(--tile);
+  overflow: hidden;
+}
+
+.box {
+  grid-area: box;
+  align-content: start;
+  gap: 2rem;
+}
+
+.phones {
+  grid-area: phones;
+}
+
+.app {
+  grid-area: app;
+}
+
+.unlocks {
+  grid-area: unlocks;
+}
+
+.boxes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+}
+
+.boxName {
+  font-weight: 650;
+  margin-bottom: 0.6rem;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.list li {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--fg-2);
+}
+
+/* A tile says its fact as a sentence, at the size a fact deserves. */
+.say {
+  max-width: 18ch;
+  font-size: clamp(1.35rem, 1.05rem + 0.9vw, 1.9rem);
+  font-weight: 680;
+  font-variation-settings: "wdth" 108;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.note {
+  max-width: 34ch;
+  color: var(--fg-2);
+  font-size: var(--t-small);
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+/* A small working control, the way the app shows it: the count and the
+   button in one pill. Where the tile is too narrow for both on a line (or for
+   "Back on the first"), the button drops under the count and takes the full
+   width. The inset is the tile corner less the button's half-height, so the
+   same box is a pill on one line and a tile-cornered panel, concentric with
+   its button, on two. */
+.widget {
+  --press: 2.25rem;
+  --inset: calc(var(--r-tile) - var(--press) / 2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: var(--inset);
+  border-radius: var(--r-tile);
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: var(--t-small);
+  color: var(--fg-2);
+}
+
+/* The count takes all the spare room on a shared line, so the button keeps
+   its own width at the right; alone on its line, the button fills it. */
+.widget > span {
+  flex: 999 1 auto;
+  padding: 0.25rem 0 0.25rem calc(1rem - var(--inset));
+  white-space: nowrap;
+}
+
+.widget strong {
+  color: var(--fg);
+  font-size: 1.1rem;
+  font-weight: 750;
+}
+
+.widget button {
+  flex: 1 0 auto;
+  min-height: var(--press);
+  padding: 0 0.95rem;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 0.86rem;
+  font-weight: 620;
+  white-space: nowrap;
+  transition:
+    transform 160ms var(--ease-out),
+    opacity 200ms var(--ease-out);
+}
+
+.widget button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.widget button:disabled {
+  background: var(--tile-2);
+  color: var(--fg-2);
+  cursor: default;
+}
+
+/* On touch it reaches past its drawn edge to a 44px tap, inside the pill. */
+@media (pointer: coarse) {
+  .widget button {
+    position: relative;
+  }
+
+  .widget button::after {
+    content: "";
+    position: absolute;
+    inset: -4px -3px;
+  }
+}
+
+/* The material: the dial itself, close up at the seam, in a window of its
+   own, with the words on solid ground beneath it. */
+.material {
+  grid-area: material;
+  align-content: start;
+  gap: clamp(1.1rem, 2vw, 1.5rem);
+  padding: 0 0 var(--pad);
+}
+
+/* On a phone held sideways the window gives way, so the band and its words
+   still fit on one screen under the nav. */
+.macroBox {
+  position: relative;
+  height: min(clamp(15rem, 24vw, 21rem), 55svh);
+}
+
+/* Flush with the tile's top, so it takes the tile's top corners; the stage
+   rounds the drawing to match. */
+.macro {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-tile) var(--r-tile) 0 0;
+}
+
+.material .say {
+  max-width: 30ch;
+  padding-inline: var(--pad);
+}
+
+@media (max-width: 980px) {
+  .bento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "box box"
+      "phones phones"
+      "app unlocks"
+      "material material";
+  }
+
+  /* Across both columns, the two lists and the phones fact's two halves
+     split on the bento's own column line, so the second list, the phones
+     detail and the unlocks tile's words all start on one edge. */
+  .boxes,
+  .phones {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: calc(var(--gap) + 2 * var(--pad));
+  }
+
+  /* The phones fact reads as a row, sentence and detail side by side, rather
+     than a tile-high block with a hole beside it. */
+  .phones {
+    align-items: first baseline;
+    min-height: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .bento {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "box"
+      "phones"
+      "app"
+      "unlocks"
+      "material";
+  }
+
+  .boxes,
+  .phones {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* One column: the fact tiles close up round their words instead of
+     holding a bento's height with a hole in the middle. */
+  .phones,
+  .app,
+  .unlocks {
+    min-height: 0;
+    align-content: start;
+    gap: 0.9rem;
+  }
+
+  .unlocks {
+    gap: 1.25rem;
+  }
+}

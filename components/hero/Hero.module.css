@@ -1,278 +1,187 @@
-/* The hero: a sign-yellow field, a phone that won't stop buzzing, and the stone.
-   The track carries the yellow; the rings sit under the stone canvas (z 1) and
-   the stage sits over it, so the phone can press down onto the stone's crown. */
+/* The hero is a pinned scroll track in three beats: calm, noise, the turn.
+   The script sets --away (the headline stepping aside), --lift (the dial
+   rising to the middle) and the dial's --zoom; the page behind darkens from
+   day to night as the dial turns (--hero-bg), and the zone, the burst and the
+   control take the mode's colour. Design sizes are in rem, so past a
+   1920×1080 window the whole composition grows with the page. */
 
-.track {
-  --stone-w: min(25vw, 44vh);
+.hero {
+  --dial-w: clamp(13.75rem, min(40vh, 34vw), 28.75rem);
+  /* Under the dial at rest: the scroll cue's room, and a little more on a
+     tall window, so the group sits just above the middle. */
+  --dial-b: max(clamp(4.5rem, 9vh, 6.5rem), 12svh);
+  --lift-to: 50svh;
+  /* Between the buttons and the dial at rest. */
+  --gap: clamp(1.5rem, 6vh, 4.5rem);
   position: relative;
-  height: 210svh;
 }
 
-.ringsLayer {
-  position: sticky;
-  top: 0;
-  z-index: 0;
-  height: 100svh;
-  min-height: 36rem;
-  pointer-events: none;
+.hero[data-theme] {
+  background: var(--hero-bg, var(--bg));
 }
 
-.rings {
-  width: 100%;
-  height: 100%;
+/* Long enough that each notification has its own stretch of scroll before
+   the dial clicks, and each detent after it room to be felt. */
+.track {
+  height: 540svh;
 }
 
+/* The first screen is one group, the copy with the dial under it, centred
+   between the nav bar and the scroll cue, so a tall window doesn't open a
+   gap between the buttons and a dial pinned to its foot. The dial rises
+   from wherever that leaves it: the script measures the way up (--rise)
+   whenever the layout changes. */
 .stage {
   position: sticky;
   top: 0;
-  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   height: 100svh;
-  min-height: 36rem;
-  margin-top: calc(-1 * max(100svh, 36rem));
+  min-height: 34rem;
+  padding: calc(var(--nav-h) + clamp(1.25rem, 4.5vh, 3.5rem)) 0 var(--dial-b);
   overflow: clip;
 }
 
-/* ——— Words and the offer ——— */
-.copy {
+/* At Home the pool is bigger than the stage, so as the stage scrolls away its
+   foot would cut the pool off in a straight line. The foot fades into the
+   ground instead, over the pool and under everything else; it comes in as
+   the rim goes (Desk's and Room's pools end at their rims, well inside). */
+.stage::after {
+  content: "";
   position: absolute;
-  left: var(--gutter);
-  top: 50%;
-  z-index: 2;
-  width: min(44vw, 38rem);
-  transform: translateY(-50%);
+  inset: auto 0 0;
+  z-index: 1;
+  height: 14svh;
+  background: linear-gradient(to bottom, transparent, var(--hero-bg, var(--bg)));
+  opacity: calc(1 - var(--rim, 1));
+  pointer-events: none;
+}
+
+/* ——— Copy ——— */
+/* Above everything else in the stage, so the buttons are always the thing a
+   click lands on while they show. */
+.copy {
+  position: relative;
+  z-index: 8;
+  display: grid;
+  justify-items: center;
+  gap: clamp(1rem, 2.4vh, 1.5rem);
+  width: 100%;
+  margin-top: auto;
+  padding-inline: var(--gutter);
+  text-align: center;
+  opacity: calc(1 - var(--away, 0));
+  transform: translateY(calc(var(--away, 0) * -7vh)) scale(calc(1 - var(--away, 0) * 0.04));
+}
+
+.hero[data-away] .copy {
+  pointer-events: none;
+}
+
+/* Out of the tab order only once the fade has finished, so the buttons fade
+   all the way out rather than blinking off part way. */
+.hero[data-gone] .copy .actions {
+  visibility: hidden;
 }
 
 .title {
-  font-size: clamp(3.4rem, 1.2rem + 5.4vw, 6rem);
-  line-height: 0.9;
-  letter-spacing: -0.015em;
-}
-
-.title span {
-  display: block;
+  font-size: clamp(3.3rem, 6.1vw, 6rem);
+  max-width: none;
 }
 
 .offer {
-  max-width: 30ch;
-  margin-top: var(--space-6);
-  font-size: var(--step-1);
-  line-height: 1.35;
-  font-weight: 500;
-  color: var(--ink-2);
+  max-width: 58ch;
+  text-wrap: balance;
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-4);
-  margin-top: var(--space-7);
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
 }
 
-.actions :global(.plate) {
-  min-height: 3.4rem;
-  font-size: var(--step-1);
-}
-
-.actions :global(.plate-square) {
-  font-size: var(--step-0);
-  min-height: 3.4rem;
-}
-
-/* ——— The phone and the stone ——— */
-.scene {
+/* ——— The zone: an ellipse on the floor in the mode's colour, growing from
+   the dial's foot. It is placed at the risen dial's foot, and follows the
+   dial up from its resting place. ——— */
+.zone {
+  --r: 0px;
+  --c: var(--mode, var(--accent));
   position: absolute;
-  inset: 0;
+  left: 50%;
+  top: calc(var(--lift-to) + var(--dial-w) * 0.32);
+  z-index: 1;
+  width: calc(var(--r) * 2);
+  height: calc(var(--r) * 1.04);
+  translate: -50% calc(-50% + (var(--lift, 0) - 1) * var(--rise, 0px));
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--c) 26%, transparent),
+    color-mix(in srgb, var(--c) 12%, transparent) 62%,
+    color-mix(in srgb, var(--c) 4%, transparent) 88%,
+    transparent
+  );
+  opacity: 0;
   pointer-events: none;
 }
 
-.stone {
-  position: absolute;
-  left: 74%;
-  bottom: 5vh;
-  width: var(--stone-w);
-  transform: translateX(-50%);
-}
-
-.phone {
-  --pw: calc(var(--stone-w) * 0.5);
-  position: absolute;
-  left: 74%;
-  bottom: calc(5vh + var(--stone-w) * 0.7 * 0.62 + 7vh);
-  width: var(--pw);
-  margin-left: calc(var(--pw) / -2);
-  aspect-ratio: 9 / 18.6;
-  padding: calc(var(--pw) * 0.035);
-  border-radius: calc(var(--pw) * 0.15);
-  background: #141414;
-  box-shadow:
-    0 0 0 1.5px #3a3a3a inset,
-    0 24px 40px -18px rgb(20 20 20 / 0.55);
-  pointer-events: auto;
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
-  will-change: transform;
-}
-
-.phone[data-dragging] {
-  cursor: grabbing;
-}
-
-/* The buzz: short bursts of shaking, twice every couple of seconds. */
-.stage:not([data-quiet]) .screen {
-  animation: buzz 2.6s steps(1) infinite;
-}
-
-.screen {
-  position: relative;
-  height: 100%;
-  overflow: hidden;
-  border-radius: calc(var(--pw) * 0.12);
-  padding: calc(var(--pw) * 0.07) calc(var(--pw) * 0.07);
-  background: #1f1e1c;
-  color: #f4f1e8;
-  font-size: calc(var(--pw) * 0.062);
-  transition: background-color 500ms var(--ease-out);
-}
-
-.stage[data-quiet] .screen {
-  background: #2a2926;
-}
-
-.status {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-  font-size: 0.9em;
-}
-
-.statusIcons {
-  display: flex;
-  gap: 0.3em;
-}
-
-.statusIcons svg {
-  width: 1.2em;
-  height: 1.2em;
-}
-
-.clock {
-  margin-top: 0.5em;
-  font-family: var(--font-sign);
-  font-size: 3.6em;
-  font-weight: 700;
-  line-height: 1;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-
-.mini {
-  display: grid;
-  gap: 0.4em;
-  margin-top: 1.2em;
-  padding: 0;
-  list-style: none;
-}
-
-.mini li {
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-  padding: 0.55em 0.6em;
-  border-radius: 0.7em;
-  background: rgb(244 241 232 / 0.14);
-  font-weight: 600;
-}
-
-.mini svg {
-  width: 1.3em;
-  height: 1.3em;
-  flex: none;
-}
-
-.mini .more {
-  justify-content: center;
-  background: none;
-  font-weight: 500;
-  opacity: 0.75;
-}
-
-.locked {
-  display: grid;
-  justify-items: center;
-  gap: 0.2em;
-  margin-top: 1.8em;
-  padding: 1.1em 0.6em;
-  border-radius: 0.8em;
-  background: var(--yellow);
-  color: var(--black);
-  animation: settle 700ms var(--ease-settle) both;
-}
-
-.lockedMark {
-  width: 2.2em;
-  height: 2.2em;
-}
-
-.locked strong {
-  font-family: var(--font-sign);
-  font-size: 1.7em;
-  line-height: 1;
-}
-
-.hint {
-  position: absolute;
-  left: calc(74% + var(--stone-w) * 0.32);
-  bottom: calc(5vh + var(--stone-w) * 0.7 * 0.62 + 7vh + var(--stone-w) * 0.5 * 1.1);
-  max-width: 11ch;
-  font-family: var(--font-sign);
-  font-size: var(--step-0);
-  font-weight: 600;
-  line-height: 1.1;
-  color: var(--ink-2);
-}
-
-.hint::before {
+/* The rim, on a layer of its own so it can fade while the pool stays: the
+   script (--rim, set on the hero) takes it out as the zone grows from Room to
+   Home, and whenever the ellipse would come near the window's edge, so no arc
+   is ever cut off by it. */
+.zone::before {
   content: "";
-  display: block;
-  width: 1.6em;
-  height: 1.6em;
-  margin-bottom: 0.3em;
-  margin-left: -0.2em;
-  background: currentColor;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 5c-7 0-11 4-12 12M3.5 13.5 7 17l3.5-3.5'/%3E%3C/svg%3E")
-    center / contain no-repeat;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid color-mix(in srgb, var(--c) 90%, transparent);
+  box-shadow:
+    0 0 32px color-mix(in srgb, var(--c) 40%, transparent),
+    inset 0 0 48px color-mix(in srgb, var(--c) 18%, transparent);
+  opacity: var(--rim, 1);
+  transition:
+    border-color 500ms var(--ease-out),
+    box-shadow 500ms var(--ease-out);
 }
 
-.stage[data-quiet] .hint {
-  opacity: 0;
-  transition: opacity 400ms var(--ease-out);
-}
-
-/* ——— The noise: notifications strewn over the field ——— */
+/* ——— The noise ———
+   In a box whose sides put the outermost cards on the page's gutter, and no
+   wider than 16:10 of the window's height, so on a wide screen the rings
+   stay round the dial rather than out at the screen's edges. */
 .noise {
   position: absolute;
   inset: 0;
-  z-index: 3;
-  margin: 0;
+  z-index: 2;
+  width: min(100% - 2 * (var(--gutter) - 1rem), 160svh);
+  margin: 0 auto;
   padding: 0;
   list-style: none;
   pointer-events: none;
 }
 
+/* Each card's centre is clamped so the whole card stays inside the window,
+   with a margin, however narrow the screen. */
 .banner {
+  --bw: clamp(14.375rem, 19vw, 18.75rem);
   position: absolute;
-  left: var(--x);
+  left: clamp(calc(var(--bw) / 2 + 1rem), var(--x), calc(100% - var(--bw) / 2 - 1rem));
   top: var(--y);
-  width: clamp(15rem, 12rem + 7vw, 20rem);
-  transform: translate(-50%, -50%) rotate(var(--r));
+  width: var(--bw);
+  translate: -50% -50%;
+  rotate: var(--r);
 }
 
+/* Until its moment in the scroll, a notification waits out of sight. */
 .mover {
   display: block;
-  will-change: transform;
+  will-change: transform, opacity, filter;
+}
+
+.banner[data-state="waiting"] .mover {
+  opacity: 0;
 }
 
 .card {
@@ -280,217 +189,671 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 0.7rem;
-  padding: 0.7rem 0.85rem;
-  border-radius: 1rem;
-  background: rgb(255 255 255 / 0.94);
-  color: var(--black);
-  font-size: 0.86rem;
-  line-height: 1.25;
+  padding: 0.7rem 0.85rem 0.7rem 0.7rem;
+  border-radius: 1.15rem;
+  background: rgb(250 250 250 / 0.97);
+  color: var(--ink);
   box-shadow:
-    0 1px 2px rgb(20 20 20 / 0.1),
-    0 14px 28px -12px rgb(20 20 20 / 0.45);
-  animation: buzz 2.6s steps(1) var(--delay) infinite;
+    0 0 0 1px rgb(11 11 12 / 0.06),
+    0 2px 6px rgb(11 11 12 / 0.05),
+    0 18px 40px -20px rgb(11 11 12 / 0.4);
 }
 
-.glyph {
-  display: grid;
-  place-items: center;
-  width: 2.2rem;
-  height: 2.2rem;
-  border-radius: 0.55rem;
-  color: var(--white);
+.banner[data-state="shown"] .card {
+  animation: buzz 3.4s linear infinite;
+  animation-delay: calc(var(--i) * -0.73s + 1.2s);
 }
 
-.glyph svg {
-  width: 1.3rem;
-  height: 1.3rem;
+/* A phone buzzing on a table: still most of the time, then a short rattle. */
+@keyframes buzz {
+  0%,
+  86%,
+  100% {
+    transform: none;
+  }
+  87.5% {
+    transform: translateX(-2px) rotate(-0.8deg);
+  }
+  89% {
+    transform: translateX(2px) rotate(0.8deg);
+  }
+  90.5% {
+    transform: translateX(-1.5px) rotate(-0.5deg);
+  }
+  92% {
+    transform: translateX(1px);
+  }
 }
 
-.stage [data-tone="purple"] {
-  --tone: #6b3fa0;
-}
-.stage [data-tone="black"] {
-  --tone: #141414;
-}
-.stage [data-tone="blue"] {
-  --tone: #1f5aa6;
-}
-.stage [data-tone="green"] {
-  --tone: #1d7a4a;
-}
-.stage [data-tone="yellow"] {
-  --tone: #b88a00;
-}
-
-.glyph[data-tone] {
-  background: var(--tone);
-}
-
-.mini svg[data-tone] {
-  color: var(--tone);
-  filter: brightness(1.6);
+.icon {
+  font-size: 2.35rem;
 }
 
 .bannerText {
   display: grid;
   min-width: 0;
+  line-height: 1.25;
+  text-align: left;
 }
 
 .bannerText strong {
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 650;
 }
 
 .bannerText span {
+  font-size: 0.84rem;
+  color: #56565b;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #4b4841;
 }
 
 .now {
   align-self: start;
-  font-size: 0.75rem;
-  color: #6a665d;
+  font-size: 0.72rem;
+  color: var(--ink-2);
 }
 
-:global(html:not(.js)) .noise {
-  display: none;
+/* ——— The dial: below the buttons at rest, then risen to the middle and
+   zoomed, punching forward at each click ——— */
+.dial {
+  position: relative;
+  z-index: 6;
+  flex: none;
+  width: var(--dial-w);
+  aspect-ratio: 1 / 0.9;
+  margin: var(--gap) 0 auto;
+  translate: 0 calc(var(--lift, 0) * var(--rise, 0px));
+  scale: var(--zoom, 1);
+  transform-origin: 50% 55%;
 }
 
-@keyframes buzz {
+/* The colour bursting out of the dial as a mode clicks on. */
+.burst {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  width: 150%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--mode, var(--accent)) 70%, transparent),
+    color-mix(in srgb, var(--mode, var(--accent)) 22%, transparent) 55%,
+    transparent
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The hero's still has room either side of the dial for a longer fade. */
+.anchor {
+  --still-fade: 7%;
+  position: absolute;
+  inset: 0;
+}
+
+.grip {
+  position: absolute;
+  inset: 4% 9% 16%;
+  border-radius: 50%;
+  cursor: grab;
+  touch-action: none;
+}
+
+.grip[data-dragging] {
+  cursor: grabbing;
+}
+
+.grip:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 6px;
+  border-radius: 50%;
+}
+
+/* Just under the dial's foot: for a small dial the line's own height would
+   otherwise reach up over the foot. */
+.hint {
+  position: absolute;
+  left: 50%;
+  top: max(90%, 100% - 1.35rem);
+  translate: -50% 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--r-pill);
+  font-size: 0.8rem;
+  font-weight: 560;
+  color: var(--fg-2);
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 400ms var(--ease-out);
+  animation: nudge 2.8s var(--ease-in-out) infinite 1.8s;
+}
+
+.hint::before {
+  content: "";
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 1.5px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+}
+
+.hint[data-hidden] {
+  opacity: 0;
+}
+
+/* The first screen's only instruction. */
+.cue {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(0.9rem, 2.4vh, 1.6rem);
+  z-index: 7;
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  translate: -50% 0;
+  font-size: 0.8rem;
+  font-weight: 560;
+  color: var(--fg-2);
+  pointer-events: none;
+  transition: opacity 400ms var(--ease-out);
+}
+
+.cue[data-hidden] {
+  opacity: 0;
+}
+
+.cueLine {
+  width: 1.5px;
+  height: 1.8rem;
+  background: linear-gradient(currentColor, transparent);
+  transform-origin: top;
+  animation: cue 2.2s var(--ease-in-out) infinite;
+}
+
+@keyframes cue {
+  0% {
+    transform: scaleY(0);
+    opacity: 1;
+  }
+  60% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+}
+
+@keyframes nudge {
   0%,
-  6%,
-  14%,
+  60%,
   100% {
     transform: none;
   }
-  1%,
-  8% {
-    transform: translate(-2px, 1px) rotate(-0.6deg);
-  }
-  2%,
-  9% {
-    transform: translate(2px, -1px) rotate(0.6deg);
-  }
-  3%,
-  10% {
-    transform: translate(-2px, -1px) rotate(-0.4deg);
-  }
-  4%,
-  11% {
-    transform: translate(2px, 1px) rotate(0.4deg);
-  }
-  5%,
-  12% {
-    transform: translate(-1px, 0) rotate(0);
+  30% {
+    transform: translateX(4px);
   }
 }
 
-@keyframes settle {
-  from {
-    transform: translateY(1.2em) scale(0.92);
-    opacity: 0;
-  }
-  to {
-    transform: none;
-    opacity: 1;
-  }
+/* ——— Zone control ——— */
+/* Out of the way on the first screen; it rises in once the noise arrives. */
+.controls {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(1.1rem, 3.2vh, 2.1rem);
+  z-index: 7;
+  display: grid;
+  justify-items: center;
+  gap: 0.55rem;
+  translate: -50% 1.25rem;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 500ms var(--ease-out),
+    translate 700ms var(--ease-out),
+    visibility 0s linear 500ms;
 }
 
-/* ——— Phones and tall screens ——— */
-@media (max-aspect-ratio: 4 / 5) {
+/* The control and its line sit on a small island of the page's own colour,
+   so a zone's rim passing behind them fades out instead of crossing the
+   text: a pill of the ground, blurred wide so it never reads as a shape.
+   It's there only while a rim is (--island): at Off there's no zone, and at
+   Home it would just be a dark patch in the pool. */
+.controls::before {
+  content: "";
+  position: absolute;
+  inset: -1.9rem -2.6rem -2.1rem;
+  z-index: -1;
+  border-radius: var(--r-pill);
+  background: var(--hero-bg, var(--bg));
+  filter: blur(22px);
+  opacity: var(--island, 0);
+  pointer-events: none;
+}
+
+.controls[data-shown] {
+  translate: -50% 0;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 500ms var(--ease-out),
+    translate 700ms var(--ease-out),
+    visibility 0s;
+}
+
+.zones {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 0.3rem;
+  border-radius: var(--r-pill);
+  background: var(--tile);
+  box-shadow: inset 0 0 0 1px var(--line);
+  transition: background-color 400ms var(--ease-out);
+}
+
+.thumb {
+  position: absolute;
+  top: 0.3rem;
+  bottom: 0.3rem;
+  left: 0.3rem;
+  width: calc((100% - 0.6rem) / 4);
+  border-radius: var(--r-pill);
+  background: var(--fg);
+  transform: translateX(calc(var(--at) * 100%));
+  transition:
+    transform 520ms var(--ease-out),
+    background-color 300ms var(--ease-out);
+}
+
+/* Past Off, the thumb takes the mode's colour, and glows with it. */
+.hero:not([data-level="0"]) .thumb {
+  background: var(--mode, var(--accent));
+  box-shadow: 0 0 22px color-mix(in srgb, var(--mode, var(--accent)) 50%, transparent);
+}
+
+.zoneButton {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  min-width: 5.6rem;
+  padding: 0.45rem 0.9rem 0.4rem;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  font-size: 0.95rem;
+  font-weight: 620;
+  line-height: 1.2;
+  transition: color 300ms var(--ease-out);
+}
+
+.zoneButton[aria-checked="true"] {
+  color: var(--bg);
+}
+
+.hero:not([data-level="0"]) .zoneButton[aria-checked="true"] {
+  color: var(--mode-ink, var(--accent-ink));
+}
+
+.zoneButton:focus-visible {
+  outline-offset: 1px;
+  border-radius: var(--r-pill);
+}
+
+.range {
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  opacity: 0.9;
+}
+
+/* On the checked detent the range reads at full strength, for contrast. */
+.zoneButton[aria-checked="true"] .range {
+  opacity: 1;
+}
+
+.line {
+  min-height: 1.5em;
+  font-size: var(--t-small);
+  font-weight: 520;
+  color: var(--fg-2);
+  text-align: center;
+}
+
+/* ——— Cairn's own notification, the only one left at Home ———
+   Beside the risen dial, and never past the window's edge. */
+.toast {
+  --tw: min(20.625rem, 30vw);
+  position: absolute;
+  left: min(calc(50% + var(--dial-w) * 0.72 + 1rem), calc(100% - var(--tw) - var(--gutter)));
+  top: calc(var(--lift-to) - var(--dial-w) * 0.55);
+  z-index: 7;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  width: var(--tw);
+  padding: 0.8rem 0.95rem 0.8rem 0.8rem;
+  border-radius: 1.15rem;
+  background: rgb(30 30 34 / 0.92);
+  color: var(--dawn);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.08),
+    0 24px 50px -24px rgb(0 0 0 / 0.8);
+  opacity: 0;
+  transform: translateY(12px) scale(0.96);
+  transition:
+    opacity 500ms var(--ease-out),
+    transform 700ms var(--ease-out);
+  pointer-events: none;
+}
+
+.toast[data-on] {
+  opacity: 1;
+  transform: none;
+  transition-delay: 450ms;
+}
+
+.toastMark {
+  width: 2.3rem;
+  height: 2.3rem;
+}
+
+.toastText {
+  display: grid;
+  line-height: 1.3;
+}
+
+.toastText strong {
+  font-size: 0.92rem;
+  font-weight: 650;
+}
+
+.toastText span {
+  font-size: 0.84rem;
+  color: var(--dawn-2);
+}
+
+.toast .now {
+  color: var(--dawn-2);
+}
+
+/* ——— Phones ——— */
+@media (max-width: 760px) {
+  .hero {
+    --dial-w: min(62vw, 36svh - 1.5rem, 26rem);
+    --dial-b: max(5.2rem, 12svh);
+    --lift-to: 62svh;
+    --gap: clamp(1.25rem, 5svh, 3rem);
+  }
+
   .track {
-    --stone-w: min(54vw, 26svh);
+    height: 460svh;
+  }
+
+  .stage {
+    padding-top: calc(var(--nav-h) + 1.1rem);
   }
 
   .copy {
-    top: calc(var(--nav-h) + 3svh);
-    right: var(--gutter);
-    width: auto;
-    transform: none;
+    gap: 0.85rem;
   }
 
   .title {
-    font-size: clamp(3rem, 13.5vw, 4.6rem);
+    font-size: clamp(2.7rem, 12.4vw, 3.6rem);
+    max-width: 9ch;
   }
 
   .offer {
-    margin-top: var(--space-4);
-    font-size: var(--step-0);
+    font-size: 1.02rem;
+    max-width: 30ch;
   }
 
-  .actions {
-    gap: var(--space-3);
-    margin-top: var(--space-5);
-  }
-
-  .actions :global(.plate),
-  .actions :global(.plate-square) {
-    min-height: 3rem;
-    font-size: var(--step-0);
-  }
-
-  .stone {
-    left: 50%;
-    bottom: 3svh;
-  }
-
-  .phone {
-    left: 50%;
-    bottom: calc(3svh + var(--stone-w) * 0.7 * 0.62 + 4svh);
-    --pw: calc(var(--stone-w) * 0.52);
-  }
-
-  .hint {
-    left: calc(50% + var(--stone-w) * 0.3);
-    bottom: calc(3svh + var(--stone-w) * 0.7 * 0.62 + 4svh + var(--stone-w) * 0.44 * 1.2);
-    font-size: 0.9rem;
+  .actions :global(.btn) {
+    --h: 2.9rem;
+    padding: 0 1.2rem;
+    font-size: 0.98rem;
   }
 
   .banner {
-    left: var(--tx);
-    top: var(--ty);
-    width: 12rem;
-    transform: translate(-50%, -50%) rotate(var(--tr));
+    left: 50%;
+    top: 24%;
+    width: min(84vw, 20.625rem);
   }
 
-  .banner:nth-child(n + 6) {
-    display: none;
+  .zoneButton {
+    min-width: 4.7rem;
+    padding-inline: 0.5rem;
   }
 
-  .hint {
-    display: none;
-  }
-
-  .card {
-    padding: 0.55rem 0.7rem;
-    font-size: 0.78rem;
-  }
-
-  .glyph {
-    width: 1.9rem;
-    height: 1.9rem;
+  .toast {
+    left: 50%;
+    top: 22%;
+    width: min(20.625rem, calc(100vw - 2 * var(--gutter)));
+    translate: -50% 0;
   }
 }
 
-/* ——— Reduced motion: no pinned scroll; it starts quiet ——— */
+/* The narrowest phones keep both buttons on one row. */
+@media (max-width: 359px) {
+  .actions {
+    gap: 0.6rem;
+  }
+
+  .actions :global(.btn) {
+    padding-inline: 1rem;
+  }
+}
+
+/* ——— The lock-screen stack: phones, upright tablets and short windows ———
+   Rings of cards need a wide window to fall between the zone's rims, so
+   anywhere else the notifications stack: the newest card is in front and
+   read, each one behind sits a step lower and a little smaller so its edge
+   shows, and past the fourth they tuck away. The script reads the same
+   query (STACKED). */
+@media (max-width: 760px), (max-height: 560px), (orientation: portrait) {
+  .banner {
+    rotate: 0deg;
+    translate: -50% calc(-50% + var(--k, 0) * 0.7rem);
+    scale: calc(1 - var(--k, 0) * 0.055);
+    z-index: calc(10 - var(--k, 0));
+    transition:
+      translate 520ms var(--ease-out),
+      scale 520ms var(--ease-out);
+  }
+
+  .banner[data-state="shown"]:not([data-front]) .card > * {
+    opacity: 0;
+    transition: opacity 180ms var(--ease-out);
+  }
+
+  .banner[data-state="shown"]:not([data-front]) .card {
+    background: rgb(240 240 241 / 0.98);
+  }
+
+  /* Past the fourth, a card tucks away behind the others: its shadow would
+     only stack onto theirs into a dark band. */
+  .banner .card {
+    transition: opacity 200ms var(--ease-out);
+  }
+
+  .banner[data-deep] .card {
+    opacity: 0;
+    box-shadow: none;
+  }
+}
+
+/* Too narrow for the toast to sit beside the zoomed dial without covering
+   it: it sits just above it instead, centred. */
+@media (min-width: 761px) and (max-width: 1180px) {
+  .toast {
+    --tw: 20.625rem;
+    left: 50%;
+    top: calc(var(--lift-to) - var(--dial-w) * 0.66 - 1rem);
+    translate: -50% -100%;
+  }
+}
+
+@media (max-height: 700px) and (min-width: 761px) {
+  .stage {
+    padding-top: calc(var(--nav-h) + 1rem);
+  }
+
+  .title {
+    font-size: clamp(2.8rem, 5vw, 4.4rem);
+  }
+}
+
+/* ——— An upright tablet ———
+   A larger dial with the stack just above it (where Cairn's toast takes its
+   place at Home), the two centred in the room the control leaves. */
+@media (min-width: 600px) and (orientation: portrait) {
+  .hero {
+    --dial-w: clamp(13.75rem, min(40svh, 52vw), 32rem);
+    --lift-to: calc(50svh + 3.5rem);
+    --gap: clamp(2rem, 6svh, 5rem);
+  }
+
+  .banner {
+    left: 50%;
+    top: calc(var(--lift-to) - var(--dial-w) * 0.62 - 5rem);
+    width: 24rem;
+  }
+
+  .toast {
+    --tw: 20.625rem;
+    left: 50%;
+    top: calc(var(--lift-to) - var(--dial-w) * 0.66 - 1rem);
+    width: var(--tw);
+    translate: -50% -100%;
+  }
+}
+
+/* ——— A short window: a phone on its side ———
+   The copy tightens so the headline, the buttons and the dial all fit under
+   the nav bar, with no room left for the scroll cue. The stack sits beside
+   the risen dial, and Cairn's toast answers it from the other side. */
+@media (max-height: 560px) and (orientation: landscape) {
+  .hero {
+    --dial-w: clamp(8.5rem, 38svh, 13.75rem);
+    --dial-b: 0.75rem;
+    --lift-to: calc(50svh - 1.25rem);
+    --gap: 0.75rem;
+  }
+
+  .stage {
+    min-height: 0;
+    padding-top: calc(var(--nav-h) + 0.75rem);
+  }
+
+  .copy {
+    gap: 0.6rem;
+  }
+
+  .title {
+    font-size: clamp(2.2rem, 10svh, 3rem);
+    max-width: none;
+  }
+
+  .offer {
+    font-size: 1.02rem;
+    max-width: 58ch;
+  }
+
+  .actions :global(.btn) {
+    --h: 2.9rem;
+    padding: 0 1.2rem;
+    font-size: 0.98rem;
+  }
+
+  .cue {
+    display: none;
+  }
+
+  .banner {
+    --bw: min(30vw, 20rem);
+    left: calc(50% - var(--dial-w) * 0.72 - 1rem - var(--bw) / 2);
+    top: var(--lift-to);
+    width: var(--bw);
+  }
+
+  .toast {
+    --tw: min(20.625rem, 30vw);
+    left: calc(50% + var(--dial-w) * 0.72 + 1rem);
+    top: calc(var(--lift-to) - var(--dial-w) * 0.55);
+    width: var(--tw);
+    translate: none;
+  }
+}
+
+/* ——— Reduced motion: no pinned track, the calm state from the start ——— */
 @media (prefers-reduced-motion: reduce) {
   .track {
     height: auto;
   }
 
-  .ringsLayer {
-    position: absolute;
-    inset: 0;
-    height: 100%;
-  }
-
   .stage {
     position: relative;
-    margin-top: 0;
+    height: auto;
+    min-height: 100svh;
+    padding-bottom: clamp(1.1rem, 3.2vh, 2.1rem);
   }
 
-  .noise {
+  .banner,
+  .card,
+  .hint {
+    animation: none;
+  }
+
+  .toast,
+  .thumb {
+    transition: none;
+  }
+
+  .controls {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .cue,
+  .hint {
     display: none;
+  }
+}
+
+/* Reduced motion's end state is one still composition, top to bottom: the
+   headline, Cairn's toast, the dial at rest and the control, all in the
+   stage's own flow, so none of them can overlap another. */
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    position: relative;
+    left: auto;
+    top: auto;
+    order: 1;
+    width: min(20.625rem, calc(100vw - 2 * var(--gutter)));
+    margin-top: var(--gap);
+    translate: none;
+  }
+
+  .dial {
+    order: 2;
+    margin: 1.5rem 0 0;
+  }
+
+  .controls {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    order: 3;
+    margin: clamp(1rem, 3vh, 2rem) 0 auto;
+    translate: none;
   }
 }

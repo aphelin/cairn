@@ -1,38 +1,40 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
-import { COLOURS, PRICE, SHIP_WINDOW } from "@/lib/content";
+import { FINISHES, PRICE, SHIP_WINDOW } from "@/lib/content";
 import { store, useStore } from "@/lib/store";
+import { useSpring } from "@/lib/useSpring";
+import { DialAnchor } from "@/components/dial/DialAnchor";
 import { Arrow, Check, Minus, Plus } from "@/components/icons";
-import { StoneAnchor } from "@/components/stone/StoneAnchor";
 import styles from "./Preorder.module.css";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const MAX = 6;
 
-// Two stones cost $88 instead of $98, so every pair in the order is priced as one.
+// Two devices cost $88 instead of $98, so every pair in the order is priced as one.
 export function total(pocket: number, home: number) {
-  const stones = pocket + home;
-  const pairs = Math.floor(stones / 2);
-  return pairs * PRICE.pair + (stones % 2) * PRICE.single;
+  const devices = pocket + home;
+  const pairs = Math.floor(devices / 2);
+  return pairs * PRICE.pair + (devices % 2) * PRICE.single;
 }
 
 export function Preorder() {
-  const { pocket, home, colour } = useStore((s) => s);
+  const { pocket, home, finish } = useStore((s) => s);
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
   const emailRef = useRef<HTMLInputElement>(null);
   const emailId = useId();
-  const stones = pocket + home;
+  const devices = pocket + home;
   const sum = total(pocket, home);
-  const saving = stones * PRICE.single - sum;
-  const colourName = COLOURS.find((c) => c.id === colour)?.name ?? "Granite";
+  const shown = useSpring(sum);
+  const saving = devices * PRICE.single - sum;
+  const finishName = FINISHES.find((f) => f.id === finish)?.name ?? "Graphite";
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!EMAIL.test(email.trim())) {
-      setError(email.trim() ? "That email doesn't look complete. Check the part after the @." : "Enter your email so we can hold your stones.");
+      setError(email.trim() ? "That email doesn’t look complete. Check the part after the @." : "Enter your email so we can hold your order.");
       emailRef.current?.focus();
       return;
     }
@@ -41,43 +43,43 @@ export function Preorder() {
   };
 
   return (
-    <section id="preorder" className="section contoured" data-ground="yellow" aria-labelledby="preorder-title">
+    <section id="preorder" className={`section ${styles.root}`} data-theme="night" aria-labelledby="preorder-title">
       <div className={`inner ${styles.grid}`}>
-        <div>
-          <h2 id="preorder-title" className="title">
+        <div className={styles.side}>
+          <h2 id="preorder-title" className="title" data-reveal="">
             Pre-order Cairn.
           </h2>
           <p className="lede">
-            ${PRICE.single} a stone. Any two for ${PRICE.pair}. {SHIP_WINDOW}, and you pay nothing until then.
+            ${PRICE.single} each. Any two for ${PRICE.pair}. {SHIP_WINDOW}, and you pay nothing until then.
           </p>
-          <StoneAnchor stone="main" order={4} still={`/stills/pocket-${colour}.webp`} className={styles.stone} />
+          <DialAnchor kind="home" order={5} still={`/stills/home-${finish}-order.webp`} className={styles.anchor} />
         </div>
 
         {done ? (
           <div className={styles.done} role="status">
-            <Check />
+            <Check className={styles.doneIcon} />
             <p className={styles.doneTitle}>Reserved. Enjoy the quiet.</p>
             <p>
-              {stones} {stones === 1 ? "stone" : "stones"} in {colourName}, ${sum}. We’d write to {email.trim()} before
-              shipping, if Cairn were real.
+              {devices} {devices === 1 ? "device" : "devices"} in {finishName}, ${sum}. We’d write to {email.trim()} before shipping, if Cairn
+              were real.
             </p>
           </div>
         ) : (
-          <form className={styles.form} data-ground="chalk" onSubmit={submit} noValidate>
+          <form className={styles.form} onSubmit={submit} noValidate>
             <fieldset className={styles.models}>
-              <legend className="visually-hidden">Stones</legend>
-              <Stepper label="Cairn Pocket" hint="Tap to lock" value={pocket} other={home} onChange={(v) => store.set({ pocket: v })} />
-              <Stepper label="Cairn Home" hint="Guards a room" value={home} other={pocket} onChange={(v) => store.set({ home: v })} />
+              <legend className="visually-hidden">Devices</legend>
+              <Stepper label="Cairn Home" hint="The dial" value={home} other={pocket} onChange={(v) => store.set({ home: v })} />
+              <Stepper label="Cairn Pocket" hint="The disc" value={pocket} other={home} onChange={(v) => store.set({ pocket: v })} />
             </fieldset>
 
-            <fieldset className={styles.colours}>
-              <legend>Colour</legend>
+            <fieldset className={styles.finishes}>
+              <legend className="label">Finish</legend>
               <div>
-                {COLOURS.map((c) => (
-                  <label key={c.id} className={styles.colour}>
-                    <input type="radio" name="order-colour" value={c.id} checked={colour === c.id} onChange={() => store.set({ colour: c.id })} />
-                    <span className={styles.chip} style={{ background: c.hex }} aria-hidden="true" />
-                    {c.name}
+                {FINISHES.map((f) => (
+                  <label key={f.id} className={styles.finish} style={{ "--finish": f.hex } as React.CSSProperties}>
+                    <input type="radio" name="order-finish" value={f.id} checked={finish === f.id} onChange={() => store.set({ finish: f.id })} />
+                    <span className={styles.chip} aria-hidden="true" />
+                    {f.name}
                   </label>
                 ))}
               </div>
@@ -108,16 +110,16 @@ export function Preorder() {
             <div className={styles.summary}>
               <p className={styles.total}>
                 <span>Total</span>
-                <output aria-live="polite">${sum}</output>
+                <output className="num" aria-live="polite">
+                  ${Math.round(shown)}
+                </output>
               </p>
               {saving > 0 && <p className={styles.saving}>Pair price saves you ${saving}</p>}
             </div>
 
-            <span className="plate-wrap">
-              <button type="submit" className="plate" disabled={stones === 0}>
-                Reserve for ${sum} <Arrow />
-              </button>
-            </span>
+            <button type="submit" className="btn btn-lg" disabled={devices === 0}>
+              Reserve for ${sum} <Arrow />
+            </button>
             <p className="demo-note">A demo: nothing is sent or charged.</p>
           </form>
         )}
@@ -150,7 +152,9 @@ function Stepper({
         <button type="button" aria-label={`One fewer ${label}`} onClick={() => onChange(value - 1)} disabled={value <= 0 || value + other <= 1}>
           <Minus />
         </button>
-        <output aria-live="polite">{value}</output>
+        <output className="num" aria-live="polite">
+          {value}
+        </output>
         <button type="button" aria-label={`One more ${label}`} onClick={() => onChange(value + 1)} disabled={value >= MAX}>
           <Plus />
         </button>

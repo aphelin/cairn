@@ -1,0 +1,807 @@
+/* The drawn app's system pieces, at iOS point sizes. The phone is authored at
+   a real iPhone Pro's 402 × 874 points and scaled as a whole, so these are the
+   platform's own metrics. Colours come from the --ios-* properties declared on
+   the phone (AppDemo.module.css) and the mode's --tint. */
+
+/* ——— A tab's screen ——— */
+.screen {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* A swipe that runs out of screen carries on down the page, as nested
+     scrolling does on a phone. (A wheel is latched in scroll.ts instead.) */
+  overscroll-behavior-y: auto;
+  scrollbar-width: none;
+  background: var(--ios-bg);
+  /* The floating tab bar (62 points, 21 off the bottom) and room to spare. */
+  padding-bottom: 110px;
+  /* Focus moves keep a control clear of the bars. */
+  scroll-padding: 118px 0 104px;
+}
+
+.screen::-webkit-scrollbar {
+  display: none;
+}
+
+.screen:focus-visible {
+  outline: none;
+}
+
+/* A mouse drags the screen like a finger. */
+.screen[data-dragging] {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.screen[data-dragging] * {
+  cursor: grabbing;
+}
+
+/* The navigation bar: the 62-point status bar and a 44-point bar under it,
+   empty until the large title scrolls away, but for a pushed screen's back
+   button and a trailing button. */
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: grid;
+  align-items: end;
+  justify-items: center;
+  height: 106px;
+  padding-bottom: 11px;
+  pointer-events: none;
+}
+
+/* iOS 26's bar buttons: capsules of glass floating over the content, a
+   bright rim on a clear fill. Drawn without a live blur: the scroll edge
+   already softens what passes under them. */
+.back,
+.trailing > button,
+.trailing > span {
+  position: absolute;
+  bottom: 2px;
+  display: inline-grid;
+  place-items: center;
+  height: 40px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--ios-bar-button);
+  box-shadow: var(--ios-bar-button-shadow);
+  color: var(--ios-label);
+  pointer-events: auto;
+  transition:
+    scale 260ms var(--ios-spring),
+    background-color 160ms var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.back {
+  left: 16px;
+  width: 40px;
+  padding: 0;
+}
+
+.back svg {
+  width: 21px;
+  height: 21px;
+  margin-left: -2px;
+}
+
+.trailing > button,
+.trailing > span {
+  right: 16px;
+  gap: 6px;
+  grid-auto-flow: column;
+  padding: 0 15px;
+  font-size: 16px;
+  font-weight: 620;
+  letter-spacing: -0.012em;
+}
+
+.back:active,
+.trailing > button:active {
+  scale: 1.08;
+  background: var(--ios-bar-button-lift);
+  transition-duration: 120ms;
+}
+
+.back:focus-visible,
+.trailing > button:focus-visible {
+  outline: 2px solid var(--ios-label);
+  outline-offset: 2px;
+}
+
+/* The trailing item's wrapper stays out of the bar's layout. */
+.trailing {
+  display: contents;
+}
+
+.content {
+  display: grid;
+  align-content: start;
+}
+
+/* A screen under a picture can always scroll its title under the bar, as
+   a navigation bar's large title collapses however short the screen. */
+.content[data-art] {
+  min-height: 790px;
+}
+
+/* iOS 26's scroll edge: once content runs under the bar it fades into the
+   background toward the top, with no line where it ends. Two stages that
+   run 50 points past the bar, so the fade never stops on the content: a wash
+   of background, solid down past the inline title's line so the title never
+   reads over the text passing under it (the dark card included), then
+   stepping out on a long ramp, long enough that a large headline passing
+   under it fades rather than being cut through; and over it a blur that is
+   gone by 92%, so what shows through the ramp is only a haze. Until content
+   runs under the bar both stages are hidden outright rather than
+   transparent, so a screen at rest carries no live blur. */
+.bar::before,
+.bar::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 -50px;
+  z-index: -1;
+  /* The blur's corners are the display's own. */
+  border-radius: var(--ios-r-screen) var(--ios-r-screen) 0 0;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 200ms var(--ease-out),
+    visibility 200ms;
+}
+
+.bar::before {
+  /* Solid to 100 of its 156 points, just past the inline title. */
+  background: linear-gradient(
+    var(--ios-bg) 64%,
+    var(--ios-wash-84) 70%,
+    var(--ios-wash-66) 77%,
+    var(--ios-wash-50) 83%,
+    var(--ios-wash-28) 90%,
+    var(--ios-wash-10) 95%,
+    var(--ios-bg-clear)
+  );
+}
+
+.bar::after {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  mask-image: linear-gradient(var(--ios-mask) 50%, var(--ios-mask-62) 64%, var(--ios-mask-25) 78%, transparent 92%);
+}
+
+/* The edge reaches its full depth over the first 56 points of scroll, so a
+   large title that has only begun to move isn't washed out long before it
+   reaches the bar. Scroll-linked, so it runs on the compositor; where scroll
+   timelines aren't supported, the edge is simply at full depth. */
+@supports (animation-timeline: scroll()) {
+  .bar::before,
+  .bar::after {
+    animation: edge-in linear both;
+    animation-timeline: scroll(nearest block);
+    animation-range: 0px 56px;
+  }
+}
+
+@keyframes edge-in {
+  from {
+    translate: 0 -50px;
+  }
+}
+
+/* It only ever follows the finger, so it stays under Reduce Motion, which
+   otherwise stops every animation on the phone (AppDemo.module.css). */
+@media (prefers-reduced-motion: reduce) {
+  @supports (animation-timeline: scroll()) {
+    .screen > .bar::before,
+    .screen > .bar::after {
+      animation: edge-in linear both !important;
+      animation-timeline: scroll(nearest block) !important;
+      animation-range: 0px 56px !important;
+    }
+  }
+}
+
+.inline {
+  position: relative;
+  font-size: 17px;
+  line-height: 22px;
+  font-weight: 620;
+  letter-spacing: -0.012em;
+  opacity: 0;
+  translate: 0 4px;
+  transition:
+    opacity 180ms var(--ease-out),
+    translate 300ms var(--ease-out);
+}
+
+/* Inherit rather than visible: a screen that has something pushed over it is
+   hidden, and its scroll edge must hide with it (a visible child of a hidden
+   parent still paints, blur and all). */
+.screen[data-under] .bar::before,
+.screen[data-under] .bar::after {
+  opacity: 1;
+  visibility: inherit;
+}
+
+.screen[data-compact] .inline {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* The scroll indicator: a thin capsule that shows while the screen moves
+   and fades once it rests, dark with a light rim so it reads on any content. */
+.indicator {
+  position: absolute;
+  top: 0;
+  right: 3px;
+  width: 3px;
+  height: 40px;
+  border-radius: var(--r-pill);
+  background: var(--ios-indicator);
+  box-shadow: 0 0 0 0.5px var(--ios-indicator-rim);
+  opacity: 0;
+  transition: opacity 360ms var(--ease-out);
+}
+
+.indicator[data-show] {
+  opacity: 1;
+  transition-duration: 60ms;
+}
+
+.head {
+  padding: 2px 20px 16px;
+}
+
+/* A pushed screen about one thing (an app, a device) centres its picture
+   and name over the lists, as iOS Settings does. */
+.head[data-art] {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 0 24px 18px;
+  text-align: center;
+}
+
+.head[data-art] .large {
+  margin-top: 12px;
+  font-size: 28px;
+  line-height: 34px;
+  transform-origin: 50% 50%;
+}
+
+/* Under a picture, the name and its subtitle leave together as the inline
+   title comes in, so the bar never shows a subtitle without its name. */
+.head[data-art] > .large,
+.head[data-art] > .sub {
+  transition: opacity 180ms var(--ease-out);
+}
+
+.screen[data-compact] .head[data-art] > .large,
+.screen[data-compact] .head[data-art] > .sub {
+  opacity: 0;
+}
+
+.large:focus {
+  outline: none;
+}
+
+.large:focus-visible {
+  outline: 2px solid var(--ios-label);
+  outline-offset: 2px;
+  border-radius: var(--ios-r-xs);
+}
+
+/* The large title: 34/41 bold. Pulled past the top, it grows from its
+   leading edge, the way a navigation bar's large title does. */
+.large {
+  font-size: 34px;
+  line-height: 41px;
+  font-weight: 700;
+  font-variation-settings: "wdth" 100;
+  letter-spacing: -0.014em;
+  transform-origin: 0 50%;
+  scale: calc(1 + min(var(--pull, 0), 110) * 0.0012);
+}
+
+/* The iOS 26 navigation subtitle. */
+.sub {
+  margin-top: 1px;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--ios-2);
+}
+
+.body {
+  display: grid;
+  padding: 0 16px;
+}
+
+/* ——— Inset grouped lists, with iOS 26's rounder sections ——— */
+.groupHead {
+  margin: 30px 4px 9px;
+  font-size: 20px;
+  line-height: 25px;
+  font-weight: 700;
+  font-variation-settings: "wdth" 100;
+  letter-spacing: -0.014em;
+}
+
+.group {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  --sep-inset: 16px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 10px 16px;
+  background: var(--ios-cell);
+}
+
+/* The section's corners go on its first and last rows that show: a group can
+   end in a row that is hidden until asked for (the unlock confirmation), and
+   the row above it must round off in the meantime. The plain and :has()
+   rules cover engines without the "of" selector (kept separate, since one
+   selector a browser can't parse drops its whole rule). */
+.group > .row:first-child {
+  border-top-left-radius: var(--ios-r-group);
+  border-top-right-radius: var(--ios-r-group);
+}
+
+.group > .row:nth-child(1 of :not([hidden])) {
+  border-top-left-radius: var(--ios-r-group);
+  border-top-right-radius: var(--ios-r-group);
+}
+
+.group > .row:last-child,
+.group > .row:has(+ .row[hidden]:last-child) {
+  border-bottom-left-radius: var(--ios-r-group);
+  border-bottom-right-radius: var(--ios-r-group);
+}
+
+.group > .row:nth-last-child(1 of :not([hidden])) {
+  border-bottom-left-radius: var(--ios-r-group);
+  border-bottom-right-radius: var(--ios-r-group);
+}
+
+/* Separators start where the text does and run to the edge. */
+.row + .row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--sep-inset);
+  right: 0;
+  height: 1px;
+  background: var(--ios-sep);
+}
+
+/* On a sharp screen, a true hairline. */
+@media (min-resolution: 2dppx) {
+  .row + .row::before {
+    height: 0.5px;
+    background: var(--ios-sep-fine);
+  }
+}
+
+.rowText {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.rowTitle {
+  font-size: 17px;
+  line-height: 22px;
+  letter-spacing: -0.012em;
+}
+
+.rowSub {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ios-2);
+}
+
+.footnote {
+  margin: 8px 20px 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ios-2);
+  text-wrap: pretty;
+}
+
+/* ——— The switch, 51 × 31. On is the mode's colour: this app is on, so it's lit. ——— */
+.switch {
+  position: relative;
+  flex: none;
+  width: 51px;
+  height: 31px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--ios-off);
+  touch-action: pan-y;
+  transition: background-color 260ms var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: var(--ios-knob);
+  box-shadow: var(--ios-knob-shadow);
+  transform-origin: left center;
+  transition:
+    transform 560ms var(--ios-spring),
+    scale 240ms var(--ease-out);
+}
+
+.switch[aria-checked="true"] {
+  background: var(--tint);
+}
+
+.switch[aria-checked="true"] .knob {
+  transform: translateX(20px);
+  transform-origin: right center;
+}
+
+/* Under a finger the knob stretches toward the way it can go. */
+.switch:active .knob {
+  scale: 1.26 1;
+}
+
+.switch[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+.switch[aria-disabled="true"] .knob {
+  scale: 1;
+}
+
+.switch:focus-visible {
+  outline: 2px solid var(--ios-label);
+  outline-offset: 2px;
+  border-radius: var(--r-pill);
+}
+
+/* ——— Small shared bits ——— */
+/* Mona Sans's tabular figures are drawn like code (a slashed zero, a
+   serifed one); the app keeps its proportional figures, as iOS text does. */
+.num {
+  font-variant-numeric: proportional-nums;
+}
+
+.pillButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--ios-fill);
+  color: var(--ios-label);
+  font-size: 15px;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+  transition:
+    background-color 160ms var(--ease-out),
+    transform 160ms var(--ease-out),
+    opacity 160ms var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pillButton:hover {
+  background: var(--ios-fill-2);
+}
+
+.pillButton:active {
+  transform: scale(0.96);
+  background: var(--ios-fill-3);
+  transition-duration: 60ms;
+}
+
+.pillButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pillButton:focus-visible {
+  outline: 2px solid var(--ios-label);
+  outline-offset: 2px;
+  border-radius: var(--r-pill);
+}
+
+.pillButton[data-strong] {
+  background: var(--ios-label);
+  color: var(--ios-cell);
+}
+
+.pillButton[data-strong]:hover {
+  background: var(--ios-label-hover);
+}
+
+.pillButton[data-strong]:active {
+  opacity: 0.78;
+}
+
+/* ——— Rows that open a screen or are picked from a list ——— */
+.navRow {
+  padding: 0;
+}
+
+.navButton {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: inherit;
+  margin: 0;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  /* The highlight fades back slowly, the way a row deselects. */
+  transition: background-color 420ms var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+  .navButton:hover {
+    background: var(--ios-hover);
+    transition-duration: 120ms;
+  }
+}
+
+.navButton:active,
+.navButton[data-selected] {
+  background: var(--ios-press);
+  transition-duration: 0ms;
+}
+
+.navButton:focus-visible {
+  outline: 2px solid var(--ios-label);
+  outline-offset: -2px;
+}
+
+.detail {
+  flex: none;
+  max-width: 45%;
+  color: var(--ios-2);
+  font-size: 17px;
+  line-height: 22px;
+  letter-spacing: -0.012em;
+  text-align: right;
+}
+
+.chevron {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-right: -4px;
+  color: var(--ios-3);
+}
+
+.check {
+  flex: none;
+  width: 21px;
+  height: 21px;
+  color: var(--tint-fill);
+  opacity: 0;
+  scale: 0.6;
+  transition:
+    opacity 160ms var(--ease-out),
+    scale 360ms var(--ios-spring);
+}
+
+.check[data-on] {
+  opacity: 1;
+  scale: 1;
+}
+
+/* A row's symbol on a small tile. */
+.tile {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--ios-r-icon);
+  background: var(--ios-label);
+  color: var(--ios-cell);
+  transition:
+    background-color 300ms var(--ease-out),
+    color 300ms var(--ease-out);
+}
+
+/* A mode's own tile wears that mode's colour wherever the mode is listed,
+   as each Focus does in iOS, so the four read apart at a glance. Off stays
+   the plain ink tile. */
+.tile[data-mode="desk"] {
+  background: var(--mode-desk);
+  color: var(--mode-desk-ink);
+}
+
+.tile[data-mode="room"] {
+  background: var(--mode-room);
+  color: var(--mode-room-ink);
+}
+
+.tile[data-mode="home"] {
+  background: var(--mode-home-deep);
+  color: var(--mode-home-ink);
+}
+
+.tile svg {
+  width: 19px;
+  height: 19px;
+}
+
+/* ——— The stepper: one capsule, two halves ——— */
+.stepper {
+  display: flex;
+  flex: none;
+  align-items: center;
+  height: 34px;
+  border-radius: var(--r-pill);
+  background: var(--ios-fill);
+}
+
+.stepper button {
+  display: grid;
+  place-items: center;
+  width: 47px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--ios-label);
+  transition:
+    background-color 140ms var(--ease-out),
+    opacity 140ms var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.stepper button:hover:not(:disabled) {
+  background: var(--ios-fill);
+}
+
+.stepper button:active:not(:disabled) {
+  background: var(--ios-fill-2);
+  transition-duration: 40ms;
+}
+
+.stepper button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.stepper button:focus-visible {
+  outline: 2px solid var(--ios-label);
+  outline-offset: -2px;
+  border-radius: var(--r-pill);
+}
+
+.stepper svg {
+  width: 19px;
+  height: 19px;
+  stroke-width: 2.2;
+}
+
+.stepRule {
+  width: 1px;
+  height: 18px;
+  background: var(--ios-sep);
+}
+
+/* ——— The slider: a 6-point track, filled in the tint up to a capsule knob ——— */
+.slider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ios-2);
+}
+
+.sliderEnd {
+  display: grid;
+  flex: none;
+  place-items: center;
+}
+
+.sliderEnd svg {
+  width: 20px;
+  height: 20px;
+}
+
+.range {
+  --knob: 38px;
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  margin: 0;
+  background: none;
+  appearance: none;
+  touch-action: pan-y;
+  cursor: pointer;
+}
+
+.range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: linear-gradient(
+    to right,
+    var(--tint-fill) calc(var(--knob) / 2 + (100% - var(--knob)) * var(--p)),
+    var(--ios-fill-2) 0
+  );
+}
+
+.range::-moz-range-track {
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--ios-fill-2);
+}
+
+.range::-moz-range-progress {
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--tint-fill);
+}
+
+.range::-webkit-slider-thumb {
+  width: var(--knob);
+  height: 24px;
+  margin-top: -9px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--ios-knob);
+  box-shadow: var(--ios-knob-shadow);
+  appearance: none;
+  transition: scale 260ms var(--ios-spring);
+}
+
+.range::-moz-range-thumb {
+  width: var(--knob);
+  height: 24px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--ios-knob);
+  box-shadow: var(--ios-knob-shadow);
+}
+
+/* Under a finger the knob swells, as iOS 26's does. */
+.range:active::-webkit-slider-thumb {
+  scale: 1.18 1.25;
+}
+
+.range:focus-visible {
+  outline: none;
+}
+
+.range:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--ios-label);
+  outline-offset: 2px;
+}
+
+.range:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--ios-label);
+  outline-offset: 2px;
+}

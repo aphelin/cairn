@@ -1,0 +1,632 @@
+/* Today: the status card goes from day to night as quiet turns on, the way
+   the page's hero does, and the reach of the dial fills with the mode's
+   colour. Below it, the two devices and the two safeguards. */
+
+.card {
+  --c-bg: var(--ios-cell);
+  --c-fg: var(--ios-label);
+  --c-fg2: var(--ios-2);
+  --c-ring: var(--ios-sep-strong);
+  --c-track: var(--ios-fill);
+  --c-track-hover: var(--ios-fill-2);
+  --c-track-press: var(--ios-fill-3);
+  position: relative;
+  display: grid;
+  padding: 6px 14px 14px;
+  border-radius: var(--ios-r-group);
+  background: var(--c-bg);
+  color: var(--c-fg);
+  isolation: isolate;
+  transition:
+    background-color 700ms var(--ease-out),
+    color 500ms var(--ease-out);
+}
+
+.card[data-on] {
+  --c-bg: var(--night-2);
+  --c-fg: var(--dawn);
+  --c-fg2: var(--dawn-2);
+  --c-ring: var(--ios-dark-line);
+  --c-track: var(--ios-dark-fill);
+  --c-track-hover: var(--ios-dark-fill-2);
+  --c-track-press: var(--ios-dark-fill-3);
+}
+
+/* Light from the zone, on the card behind the map. Only while quiet is on.
+   It keeps inside the card's own corners, so the card needs no clip of its
+   own: a rounded clip round the pulse's moving layer costs a mask, and
+   Chrome's clipped captures drew it as stray squares past the display's
+   corners. */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(60% 45% at 50% 25%, color-mix(in oklab, var(--zone) 26%, transparent), transparent);
+  opacity: 0;
+  transition: opacity 700ms var(--ease-out);
+}
+
+.card[data-on]:not([data-paused])::before {
+  opacity: 1;
+}
+
+/* ——— The map ——— */
+.mapBox {
+  position: relative;
+  width: 224px;
+  height: 224px;
+  margin: 0 auto;
+}
+
+.map {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ring {
+  fill: none;
+  stroke: var(--c-ring);
+  stroke-width: 1;
+  transition: stroke 500ms var(--ease-out);
+}
+
+.zone {
+  transform-box: view-box;
+  transform-origin: 120px 120px;
+  transform: scale(var(--k));
+  opacity: 0;
+  transition:
+    transform 900ms var(--ios-spring),
+    opacity 400ms var(--ease-out),
+    filter 400ms var(--ease-out);
+}
+
+.mapBox:not([data-level="0"]) .zone {
+  opacity: 1;
+}
+
+.card[data-paused] .zone {
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+
+.stopIn {
+  stop-color: var(--zone);
+  stop-opacity: 0.06;
+}
+
+.stopMid {
+  stop-color: var(--zone);
+  stop-opacity: 0.2;
+}
+
+.stopOut {
+  stop-color: var(--zone);
+  stop-opacity: 0.46;
+}
+
+.zoneEdge {
+  fill: none;
+  stroke: var(--zone);
+  stroke-width: 1.6;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 5px var(--zone));
+}
+
+/* A pulse from the dial out to the edge of its reach, while quiet is on.
+   It's a plain element over the map rather than part of the drawing, so it
+   runs on the compositor: the map itself never repaints for it. */
+.ripple {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--d) * 1px);
+  height: calc(var(--d) * 1px);
+  margin: calc(var(--d) * -0.5px);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.6px var(--zone);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mapBox[data-quiet] .ripple {
+  animation: ripple 3.2s cubic-bezier(0.22, 0.6, 0.35, 1) infinite;
+}
+
+/* Out of sight, it waits. */
+:global([data-away]) .ripple {
+  animation-play-state: paused;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0.18);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+.ringLabel {
+  fill: var(--c-fg2);
+  font-size: 10.5px;
+  font-weight: 620;
+  transition: fill 300ms var(--ease-out);
+}
+
+.ringLabel[data-on] {
+  fill: var(--c-fg);
+}
+
+.phoneBody {
+  fill: var(--c-fg);
+  transition: fill 500ms var(--ease-out);
+}
+
+.phoneScreen {
+  fill: var(--c-bg);
+  transition: fill 700ms var(--ease-out);
+}
+
+.phoneLock {
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out);
+}
+
+.phoneLock path {
+  fill: none;
+  stroke: var(--zone);
+  stroke-width: 1.2;
+}
+
+.phoneLock rect {
+  fill: var(--zone);
+}
+
+.mapBox[data-quiet] .phoneLock {
+  opacity: 1;
+}
+
+/* The dial: satin black body, knurled edge, ceramic cap, the dot. */
+.body {
+  fill: var(--night-3);
+  stroke: var(--ios-dial-edge);
+  stroke-width: 0.8;
+}
+
+.knurl line {
+  stroke: var(--ios-knurl);
+  stroke-width: 0.7;
+}
+
+.cap {
+  fill: var(--dawn);
+}
+
+.dot {
+  fill: var(--ink);
+  transition:
+    rotate 700ms var(--ios-spring),
+    fill 300ms var(--ease-out);
+}
+
+.seam {
+  fill: none;
+  stroke: var(--zone);
+  stroke-width: 1.4;
+  opacity: 0;
+  filter: drop-shadow(0 0 3px var(--zone));
+  transition: opacity 500ms var(--ease-out);
+}
+
+.mapBox[data-quiet] .dot,
+.deviceGlyph[data-on] .dot {
+  fill: var(--zone);
+}
+
+.mapBox[data-quiet] .seam,
+.deviceGlyph[data-on] .seam {
+  opacity: 1;
+}
+
+/* ——— Status and counts ——— */
+.status {
+  display: grid;
+  justify-items: center;
+  margin-top: 2px;
+  text-align: center;
+}
+
+/* The card's picture, its headline and its figures fade as they pass under
+   the scroll edge, each gone by the time its foot reaches the edge's end
+   (the bar's 106 points and the edge's 50), so a large headline never shows
+   cut in half under the bar. Scroll-linked, so it runs on the compositor;
+   without view timelines they simply pass under the edge. */
+@supports (animation-timeline: view()) {
+  .mapBox,
+  .status,
+  .stats {
+    animation: under-edge linear both;
+    animation-timeline: view(block 156px 0px);
+    animation-range: exit-crossing;
+  }
+}
+
+@keyframes under-edge {
+  to {
+    opacity: 0;
+  }
+}
+
+/* Only ever following the finger, the fades stay under Reduce Motion, which
+   otherwise stops every animation on the phone (AppDemo.module.css). */
+@media (prefers-reduced-motion: reduce) {
+  @supports (animation-timeline: view()) {
+    .card > .mapBox,
+    .card > .status,
+    .card > .stats {
+      animation: under-edge linear both !important;
+      animation-timeline: view(block 156px 0px) !important;
+      animation-range: exit-crossing !important;
+    }
+  }
+}
+
+.state {
+  font-size: 26px;
+  line-height: 31px;
+  font-weight: 740;
+  font-variation-settings: "wdth" 104;
+  letter-spacing: -0.022em;
+}
+
+.line {
+  margin-top: 2px;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--c-fg2);
+  transition: color 500ms var(--ease-out);
+}
+
+.relock {
+  margin-top: 12px;
+}
+
+.card[data-on] .relock {
+  background: var(--dawn);
+  color: var(--ink);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 16px 0 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--c-ring);
+  transition: border-color 500ms var(--ease-out);
+}
+
+.stat {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+}
+
+.stat + .stat {
+  border-left: 1px solid var(--c-ring);
+}
+
+.statValue {
+  font-size: 28px;
+  line-height: 33px;
+  font-weight: 720;
+  font-variation-settings: "wdth" 104;
+  letter-spacing: -0.02em;
+}
+
+.statLabel {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--c-fg2);
+  transition: color 500ms var(--ease-out);
+}
+
+/* ——— The active mode's settings, a row that opens them ——— */
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  margin: 0 0 12px;
+  padding: 9px 12px 9px 16px;
+  border: 0;
+  border-radius: var(--ios-r-card-row);
+  background: var(--c-track);
+  color: var(--c-fg);
+  font: inherit;
+  text-align: left;
+  transition: background-color 420ms var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+  .summary:hover {
+    background: var(--c-track-hover);
+    transition-duration: 120ms;
+  }
+}
+
+.summary:active {
+  background: var(--c-track-press);
+  transition-duration: 0ms;
+}
+
+.summary:focus-visible {
+  outline: 2px solid var(--c-fg);
+  outline-offset: 2px;
+}
+
+.summaryText {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.summaryTitle {
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+
+.summaryLine {
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--c-fg2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summaryChevron {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--c-fg2);
+}
+
+/* ——— The mode control: an iOS segmented control, one segment per detent ——— */
+.segments {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 3px;
+  border-radius: var(--r-pill);
+  background: var(--c-track);
+  touch-action: pan-y;
+  transition: background-color 500ms var(--ease-out);
+}
+
+.thumb {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc((100% - 6px) / 4);
+  border-radius: var(--r-pill);
+  background: var(--ios-knob);
+  box-shadow: var(--ios-thumb-shadow);
+  /* Placed with translate, so the press's scale lifts the thumb where it
+     sits rather than scaling its travel. */
+  translate: calc(var(--drag, var(--at)) * 100%) 0;
+  transition:
+    translate 600ms var(--ios-spring),
+    background-color 400ms var(--ease-out),
+    box-shadow 400ms var(--ease-out),
+    scale 280ms var(--ios-spring);
+}
+
+/* Under a finger the thumb lifts a little; dragged, it follows exactly. */
+.segments[data-press] .thumb {
+  scale: 1.04 1.08;
+}
+
+.segments[data-scrub] .thumb {
+  transition:
+    background-color 400ms var(--ease-out),
+    box-shadow 400ms var(--ease-out),
+    scale 280ms var(--ios-spring);
+}
+
+.segments:not([data-mode="off"]) .thumb {
+  background: var(--tint-fill);
+  box-shadow: 0 6px 18px -6px var(--tint);
+}
+
+.segment {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  padding: 7px 0 6px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--c-fg2);
+  transition: color 300ms var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.segment:hover {
+  color: var(--c-fg);
+}
+
+.segment[aria-checked="true"] {
+  color: var(--c-fg);
+}
+
+.segments:not([data-mode="off"]) .segment[aria-checked="true"] {
+  color: var(--tint-fill-ink);
+}
+
+.segment:active .segLabel {
+  scale: 0.94;
+}
+
+.segment:focus-visible {
+  outline: 2px solid var(--c-fg);
+  outline-offset: 1px;
+  border-radius: var(--r-pill);
+}
+
+.segLabel {
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  transition: scale 160ms var(--ease-out);
+}
+
+.segRange {
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 540;
+}
+
+/* ——— Devices ——— */
+.device {
+  --sep-inset: 68px;
+  min-height: 60px;
+}
+
+.deviceGlyph {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  overflow: visible;
+}
+
+.deviceGlyph[data-pocket] .body {
+  fill: var(--night-3);
+}
+
+.battery {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.batteryIcon {
+  width: 21px;
+  height: 11px;
+  color: var(--ios-2);
+}
+
+.chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 11px;
+  border-radius: var(--r-pill);
+  background: var(--ios-fill);
+  color: var(--ios-label);
+  font-size: 14px;
+  font-weight: 620;
+  letter-spacing: -0.005em;
+}
+
+.chipDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--zone);
+  box-shadow: 0 0 6px var(--zone);
+  transition: background-color 400ms var(--ease-out);
+}
+
+.chip[data-mode="off"] .chipDot {
+  background: var(--ios-3);
+  box-shadow: none;
+}
+
+.tapIcon {
+  width: 16px;
+  height: 16px;
+  margin: 0 -1px 0 -3px;
+  color: var(--ios-2);
+}
+
+/* ——— Safeguards ——— */
+.anchor:focus {
+  outline: none;
+}
+
+.guard {
+  --sep-inset: 58px;
+}
+
+.guardSub[data-alert] {
+  color: var(--ios-label);
+  font-weight: 560;
+}
+
+.guardIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--ios-r-icon);
+  background: var(--ios-label);
+  color: var(--ios-cell);
+}
+
+.guardIcon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.ask {
+  display: grid;
+  gap: 12px;
+  padding: 2px 16px 16px;
+  animation: ask-in 320ms var(--ease-out);
+}
+
+.ask[hidden] {
+  display: none;
+}
+
+.ask.ask[id]::before {
+  display: none;
+}
+
+@keyframes ask-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.askText {
+  font-size: 15px;
+  line-height: 20px;
+  text-wrap: pretty;
+}
+
+.askButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

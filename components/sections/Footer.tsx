@@ -1,25 +1,28 @@
 import { AUTHOR } from "@/lib/content";
-import { Arrow, CairnMark } from "@/components/icons";
+import { LiveMark } from "@/components/brand/LiveMark";
+import { Arrow } from "@/components/icons";
 import styles from "./Footer.module.css";
 
-// The end of the trail: a black enamel plate.
+// The close: the name, signed large under the closing line, and the fine
+// print that says none of this ships.
 export function Footer() {
   return (
-    <footer className={`section contoured ${styles.footer}`} data-ground="black">
+    <footer className={`section ${styles.footer}`} data-theme="night">
       <div className="inner">
-        <p className={styles.close}>
-          <CairnMark className={styles.mark} />
-          Put the noise down.
-        </p>
-        <span className="plate-wrap">
-          <a className="plate" href="#preorder">
+        <div className={styles.close}>
+          <p className={styles.line}>Turn it down.</p>
+          <a className="btn btn-lg" href="#preorder">
             Pre-order Cairn <Arrow />
           </a>
-        </span>
+        </div>
+        <p className={styles.word} aria-hidden="true">
+          <LiveMark knurl className={styles.mark} />
+          Cairn
+        </p>
         <div className={styles.fine}>
           <p>
             Cairn is a design concept. There is no product, nothing ships, nothing you type here is sent anywhere, and the reviews are
-            invented.
+            invented. App names and icons belong to their owners; Cairn isn’t affiliated with any of&nbsp;them.
           </p>
           <p>
             Concept, design and build by {AUTHOR.name}
@@ -31,7 +34,7 @@ export function Footer() {
                 </a>
               </span>
             ))}{" "}
-            · © 2026
+            · ©&nbsp;2026
           </p>
         </div>
       </div>

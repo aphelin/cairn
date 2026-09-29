@@ -1,44 +1,72 @@
 .footer {
-  padding-bottom: var(--space-7);
+  padding-bottom: clamp(2rem, 4vw, 3rem);
+  overflow: clip;
 }
 
 .close {
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
-  gap: 0.2em 0.35em;
-  font-family: var(--font-sign);
-  font-size: clamp(3rem, 1.2rem + 7vw, 7.5rem);
-  font-weight: 700;
-  line-height: 0.9;
-  letter-spacing: -0.02em;
-  margin-bottom: var(--space-7);
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.line {
+  font-size: var(--t-h2);
+  font-weight: 760;
+  font-variation-settings: "wdth" 116;
+  letter-spacing: -0.034em;
+  line-height: 1;
+}
+
+.word {
+  display: flex;
+  align-items: center;
+  gap: 0.08em;
+  margin: clamp(4rem, 8vw, 6.5rem) 0 clamp(2rem, 4vw, 3rem);
+  /* A signature, not a billboard: the name is held to a little over twice
+     the closing line, so it grows with the type scale (and the root on large
+     screens) rather than with the window. The mark and the name run about
+     3.7em, so on a phone the size is held to what fits between the gutters
+     and the name is never cut. */
+  font-size: min(calc(var(--t-h2) * 2.4), calc((100vw - 2 * var(--gutter)) * 0.26));
+  font-weight: 800;
+  font-variation-settings: "wdth" 125;
+  letter-spacing: -0.03em;
+  line-height: 0.78;
+  color: var(--dawn);
+  white-space: nowrap;
 }
 
 .mark {
-  width: 0.85em;
-  height: 0.85em;
-  color: var(--yellow);
+  width: 0.72em;
+  height: 0.72em;
+  flex: none;
+  margin-right: 0.06em;
+  translate: 0 0.03em;
 }
 
+/* The rule runs the column's full width, like the close above it; only the
+   words keep to a reading measure. */
 .fine {
   display: grid;
-  gap: var(--space-3);
-  margin-top: var(--space-9);
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--rule);
-  font-size: var(--step--1);
-  color: var(--ink-2);
+  gap: 0.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+  color: var(--fg-2);
+  font-size: var(--t-small);
 }
 
 .fine p {
   max-width: 70ch;
+  text-wrap: pretty;
+}
+
+/* The credits break into even lines, so the year never hangs alone. */
+.fine p:last-child {
+  text-wrap: balance;
 }
 
 .fine a {
-  color: var(--ink);
-}
-
-.fine a:focus-visible {
-  outline-color: var(--yellow);
+  color: var(--fg);
 }
